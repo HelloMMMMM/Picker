@@ -44,9 +44,10 @@ public class WheelView extends View {
      * 线条的颜色
      */
     private int lineColor = 0xFF888888;
-
-
-    private int rate = 120;               //惯性滑动比率，rate越大，速率越快
+    /**
+     * 惯性滑动比率，rate越大，速率越快
+     */
+    private int rate = 5;
 
 
     private int cacheNowItem = -1;        //预设当前item的位置，负数表示不设定
@@ -299,22 +300,25 @@ public class WheelView extends View {
             width = getWidth();
             height = getHeight();
 
-            itemHeight = (height - getPaddingTop() - getPaddingBottom()) / showSize;
+            int temp1 = height - getPaddingTop() - getPaddingBottom();
+            itemHeight = temp1 / showSize;
+            centerItemTop = temp1 / 2 + getPaddingTop() - itemHeight / 2;
+            centerItemBottom = temp1 / 2 + getPaddingTop() + itemHeight / 2;
 
             itemWidth = width / level;
             itemX1 = itemWidth / 2;
             itemX2 = itemX1 + itemWidth;
             itemX3 = itemX2 + itemWidth;
 
-            minScrollY1 = -(getRealHeight1() - (showSize + 1) / 2 * itemHeight);
-            minScrollY2 = -(getRealHeight2() - (showSize + 1) / 2 * itemHeight);
-            minScrollY3 = -(getRealHeight3() - (showSize + 1) / 2 * itemHeight);
+            int temp2 = (showSize + 1) / 2 * itemHeight;
+            minScrollY1 = temp2 - getRealHeight1();
+            minScrollY2 = temp2 - getRealHeight2();
+            minScrollY3 = temp2 - getRealHeight3();
             maxScrollY = (showSize - 1) / 2 * itemHeight;
 
-            centerItemTop = (height - getPaddingTop() - getPaddingBottom()) / 2 + getPaddingTop() - itemHeight / 2;
-            centerItemBottom = (height - getPaddingTop() - getPaddingBottom()) / 2 + getPaddingTop() + itemHeight / 2;
-
-            shader = new LinearGradient(0, 0, 0, height, new int[]{0xFFFFFFFF, 0xAAFFFFFF, 0x00FFFFFF, 0x00FFFFFF, 0xAAFFFFFF, 0xFFFFFFFF}, new float[]{0.0f, centerItemTop / height, centerItemTop / height, centerItemBottom / height, centerItemBottom / height, 1.0f}, Shader.TileMode.REPEAT);
+            int[] colors = new int[]{0xFFFFFFFF, 0xAAFFFFFF, 0x00FFFFFF, 0x00FFFFFF, 0xAAFFFFFF, 0xFFFFFFFF};
+            float[] positions = new float[]{0.0f, centerItemTop / height, centerItemTop / height, centerItemBottom / height, centerItemBottom / height, 1.0f};
+            shader = new LinearGradient(0, 0, 0, height, colors, positions, Shader.TileMode.REPEAT);
             coverPaint.setShader(shader);
 
             isStart = false;
@@ -323,7 +327,6 @@ public class WheelView extends View {
 
     @Override
     public void computeScroll() {
-        //scroller的滚动是否完成
         switch (currentTouchLevel) {
             case LEVEL_ONE:
                 if (mScroller1.computeScrollOffset()) {
@@ -500,6 +503,11 @@ public class WheelView extends View {
     }
 
     @Override
+    public boolean performClick() {
+        return super.performClick();
+    }
+
+    @Override
     public boolean onTouchEvent(MotionEvent event) {
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
@@ -508,6 +516,7 @@ public class WheelView extends View {
                 downX = event.getX();
                 lastY = downY;
                 whereIsTouch();
+                performClick();
                 break;
             case MotionEvent.ACTION_MOVE:
                 float y = event.getRawY();
@@ -557,8 +566,9 @@ public class WheelView extends View {
     }
 
     private void checkStateAndPosition() {
-        int minScrollY = 0;
-        float scrollY = 0;
+        //获取对应区域的变量
+        int minScrollY;
+        float scrollY;
         OverScroller mScroller;
         switch (currentTouchLevel) {
             case LEVEL_ONE:
@@ -590,22 +600,23 @@ public class WheelView extends View {
             mScroller.startScroll(0, (int) scrollY, 0, maxScrollY - (int) scrollY, 400);
         } else {
             long endTime = System.currentTimeMillis();
-            //超出滑动时间或者不足滑动距离
-            //endTime - downTime > 250 ||
-            if (Math.abs(lastY - downY) < itemHeight / 2) {
-                int dy = (int) scrollY % itemHeight;         //不足一个Item高度的部分
-                if (Math.abs(dy) > itemHeight / 2) {          //如果偏移大于item的一半，
-                    if (scrollY < 0) {
-                        mScroller.startScroll(0, (int) scrollY, 0, -itemHeight - dy);
-                    } else {
-                        mScroller.startScroll(0, (int) scrollY, 0, itemHeight - dy);
-                    }
+            int dy = (int) scrollY % itemHeight;
+            long ds = endTime - downTime;
+            if (ds > 250 && Math.abs(dy) > itemHeight / 2) {
+                //超出startScroll方法250ms滑动持续时间且滑动距离大于item高度的一半
+                if (scrollY < 0) {
+                    //向上滑，dy为负，(-itemHeight-dy)为负，向下弹回
+                    mScroller.startScroll(0, (int) scrollY, 0, -itemHeight - dy);
                 } else {
-                    mScroller.startScroll(0, (int) scrollY, 0, -dy);
+                    //向下滑，dy为正，(itemHeight-dy)为正，向上弹回
+                    mScroller.startScroll(0, (int) scrollY, 0, itemHeight - dy);
                 }
+            } else if (Math.abs(dy) < itemHeight / 2) {
+                //不足滑动距离
+                mScroller.startScroll(0, (int) scrollY, 0, -dy);
             } else {
-                //滑动距离，和手指滑动距离成正比，和滑动时间成反比
-                int finalY = (int) ((scrollY + rate * (lastY - downY) / (endTime - downTime))) / itemHeight * itemHeight;
+                //正常情况(滑动距离，和手指滑动距离成正比，和滑动时间成反比)
+                int finalY = (int) ((scrollY + dy * rate));
                 if (!isCircle) {
                     if (finalY < minScrollY) {
                         finalY = minScrollY;
