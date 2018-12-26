@@ -193,7 +193,7 @@ public class WheelView extends View {
      * @param levelOneData 一级数据
      */
     public void setLevelOneData(List<String> levelOneData) {
-        if (level != LEVEL_ONE) {
+        if (level < LEVEL_ONE) {
             return;
         }
         this.levelOneData = levelOneData;
@@ -207,7 +207,7 @@ public class WheelView extends View {
      * @param levelTwoData 二级数据
      */
     public void setLevelTwoData(List<String> levelTwoData) {
-        if (level != LEVEL_TWO) {
+        if (level < LEVEL_TWO) {
             return;
         }
         this.levelTwoData = levelTwoData;
@@ -221,7 +221,7 @@ public class WheelView extends View {
      * @param levelThreeData 三级数据
      */
     public void setLevelThreeData(List<String> levelThreeData) {
-        if (level != LEVEL_THREE) {
+        if (level < LEVEL_THREE) {
             return;
         }
         this.levelThreeData = levelThreeData;
