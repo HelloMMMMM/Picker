@@ -32,10 +32,22 @@ public class WheelView extends View {
      * 文字大小，默认14sp
      */
     private float textSize = 14;
-    private boolean isCircle = false;     //是否为环形
+    /**
+     * 是否可以循环滚动
+     */
+    private boolean isCircle = false;
+    /**
+     * 文字颜色
+     */
+    private int textColor = 0xFF000000;
+    /**
+     * 线条的颜色
+     */
+    private int lineColor = 0xFF888888;
+
+
     private int rate = 120;               //惯性滑动比率，rate越大，速率越快
-    private int textColor = 0xFF000000;   //文字颜色
-    private int lineColor = 0xFF888888;   //线条的颜色
+
 
     private int cacheNowItem = -1;        //预设当前item的位置，负数表示不设定
 
@@ -108,9 +120,8 @@ public class WheelView extends View {
      */
     private long downTime;
     /**
-     * 滚动器
+     * 各级联区域滚动器
      */
-    private OverScroller mScroller;
     private OverScroller mScroller1;
     private OverScroller mScroller2;
     private OverScroller mScroller3;
@@ -161,7 +172,6 @@ public class WheelView extends View {
 
     private void init() {
         scaleDensity = getResources().getDisplayMetrics().scaledDensity;
-        mScroller = new OverScroller(getContext());
         mScroller1 = new OverScroller(getContext());
         mScroller2 = new OverScroller(getContext());
         mScroller3 = new OverScroller(getContext());
@@ -183,6 +193,9 @@ public class WheelView extends View {
      * @param levelOneData 一级数据
      */
     public void setLevelOneData(List<String> levelOneData) {
+        if (level != LEVEL_ONE) {
+            return;
+        }
         this.levelOneData = levelOneData;
         levelDataSize1 = levelOneData == null ? 0 : levelOneData.size();
         notifyDataSetChanged();
@@ -194,6 +207,9 @@ public class WheelView extends View {
      * @param levelTwoData 二级数据
      */
     public void setLevelTwoData(List<String> levelTwoData) {
+        if (level != LEVEL_TWO) {
+            return;
+        }
         this.levelTwoData = levelTwoData;
         levelDataSize2 = levelTwoData == null ? 0 : levelTwoData.size();
         notifyDataSetChanged();
@@ -205,6 +221,9 @@ public class WheelView extends View {
      * @param levelThreeData 三级数据
      */
     public void setLevelThreeData(List<String> levelThreeData) {
+        if (level != LEVEL_THREE) {
+            return;
+        }
         this.levelThreeData = levelThreeData;
         levelDataSize3 = levelThreeData == null ? 0 : levelThreeData.size();
         notifyDataSetChanged();
