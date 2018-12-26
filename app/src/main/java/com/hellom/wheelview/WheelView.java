@@ -13,17 +13,17 @@ import android.widget.OverScroller;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
 
+/**
+ * @author mx
+ */
 public class WheelView extends View {
-
     /**
      * 各级联区域滚动Y值
      */
     private float scrollY1 = 0;
     private float scrollY2 = 0;
     private float scrollY3 = 0;
-    private float scrollY = 0;
     /**
      * 显示的item个数，默认为5
      */
@@ -102,21 +102,26 @@ public class WheelView extends View {
     /**
      * 上次操作的坐标以及按下时候的坐标
      */
-    private float lastY, lastX, downY, downX;
+    private float lastY, downY, downX;
     /**
      * 按下时的时间
      */
     private long downTime;
-
+    /**
+     * 滚动器
+     */
     private OverScroller mScroller;
-
+    private OverScroller mScroller1;
+    private OverScroller mScroller2;
+    private OverScroller mScroller3;
+    /**
+     * 用于标识一些基本参数是否已经初始化
+     */
     public boolean isStart = true;
-
     /**
      * 单位sp大小
      */
     private float scaleDensity;
-
     /**
      * 数据级联层数,默认一级
      */
@@ -157,6 +162,9 @@ public class WheelView extends View {
     private void init() {
         scaleDensity = getResources().getDisplayMetrics().scaledDensity;
         mScroller = new OverScroller(getContext());
+        mScroller1 = new OverScroller(getContext());
+        mScroller2 = new OverScroller(getContext());
+        mScroller3 = new OverScroller(getContext());
         data = new ArrayList<>();
         paint = new Paint();
         paint.setAntiAlias(true);
@@ -297,22 +305,26 @@ public class WheelView extends View {
     @Override
     public void computeScroll() {
         //scroller的滚动是否完成
-        if (mScroller.computeScrollOffset()) {
-            switch (currentTouchLevel) {
-                case LEVEL_ONE:
-                    scrollY1 = mScroller.getCurrY();
-                    break;
-                case LEVEL_TWO:
-                    scrollY2 = mScroller.getCurrY();
-                    break;
-                case LEVEL_THREE:
-                    scrollY3 = mScroller.getCurrY();
-                    break;
-                default:
-                    break;
-            }
-            invalidate();
+        switch (currentTouchLevel) {
+            case LEVEL_ONE:
+                if (mScroller1.computeScrollOffset()) {
+                    scrollY1 = mScroller1.getCurrY();
+                }
+                break;
+            case LEVEL_TWO:
+                if (mScroller2.computeScrollOffset()) {
+                    scrollY2 = mScroller2.getCurrY();
+                }
+                break;
+            case LEVEL_THREE:
+                if (mScroller3.computeScrollOffset()) {
+                    scrollY3 = mScroller3.getCurrY();
+                }
+                break;
+            default:
+                break;
         }
+        invalidate();
         super.computeScroll();
     }
 
@@ -476,7 +488,6 @@ public class WheelView extends View {
                 downY = event.getRawY();
                 downX = event.getX();
                 lastY = downY;
-                lastX = downX;
                 whereIsTouch();
                 break;
             case MotionEvent.ACTION_MOVE:
@@ -529,20 +540,27 @@ public class WheelView extends View {
     private void checkStateAndPosition() {
         int minScrollY = 0;
         float scrollY = 0;
+        OverScroller mScroller;
         switch (currentTouchLevel) {
             case LEVEL_ONE:
                 minScrollY = minScrollY1;
                 scrollY = scrollY1;
+                mScroller = mScroller1;
                 break;
             case LEVEL_TWO:
                 minScrollY = minScrollY2;
                 scrollY = scrollY2;
+                mScroller = mScroller2;
                 break;
             case LEVEL_THREE:
                 minScrollY = minScrollY3;
                 scrollY = scrollY3;
+                mScroller = mScroller3;
                 break;
             default:
+                minScrollY = minScrollY1;
+                scrollY = scrollY1;
+                mScroller = mScroller1;
                 break;
         }
         if (!isCircle && scrollY < minScrollY) {
@@ -595,7 +613,6 @@ public class WheelView extends View {
             default:
                 break;
         }
-        //scrollY += dy;
         invalidate();
     }
 
