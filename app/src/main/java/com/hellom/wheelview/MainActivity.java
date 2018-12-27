@@ -2,14 +2,12 @@ package com.hellom.wheelview;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.view.View;
 
-import com.ycuwq.datepicker.date.DatePickerDialogFragment;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener {
+public class MainActivity extends AppCompatActivity{
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -18,18 +16,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         final WheelView picker = findViewById(R.id.wheel);
         List<String> one = new ArrayList<>();
-        for (int i = 0; i < 50; i++) {
+        for (int i = 0; i < 500; i++) {
             one.add(String.valueOf(i));
         }
         picker.setLevelOneData(one);
-
-        findViewById(R.id.open).setOnClickListener(this);
-    }
-
-
-    @Override
-    public void onClick(View view) {
-        DatePickerDialogFragment datePickerDialogFragment = new DatePickerDialogFragment();
-        datePickerDialogFragment.show(getFragmentManager(), "DatePickerDialogFragment");
     }
 }

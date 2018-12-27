@@ -252,6 +252,10 @@ public class WheelView extends View {
             case LEVEL_ONE:
                 if (mScroller1.computeScrollOffset()) {
                     scrollY1 = mScroller1.getCurrY();
+                } else {
+                    if (scrollY1 >= minScrollY1 && scrollY1 <= maxScrollY) {
+                        correctScrollY();
+                    }
                 }
                 break;
             default:
@@ -379,16 +383,19 @@ public class WheelView extends View {
             mScroller.startScroll(0, (int) scrollY, 0, maxScrollY - (int) scrollY, 400);
         } else {
             long endTime = System.currentTimeMillis();
-            int dy = (int) scrollY % itemHeight;
+
             long ds = endTime - downTime;
             mVelocityTracker.computeCurrentVelocity(300);
             int speed = (int) mVelocityTracker.getYVelocity();
 
             //正常情况(滑动距离，和手指滑动距离成正比，和滑动时间成反比)
-            int finalY = (int) ((scrollY + dy * speed));
+            //int finalY = (int) ((scrollY + dy * speed));
             if (!isCircle) {
 
-
+                /*int dy = (int) (scrollY + speed) % itemHeight;
+                if (dy != 0) {
+                    speed += correctScrollY(dy);
+                }*/
                 mScroller.fling(0, (int) scrollY, 0, speed, 0, 0, minScrollY1, maxScrollY);
 
               /*  if (finalY < minScrollY) {
@@ -412,6 +419,19 @@ public class WheelView extends View {
                     mScroller.startScroll(0, (int) scrollY, 0, -dy);
                 }*/
             }
+        }
+    }
+
+    private void correctScrollY() {
+        int dy = (int) (scrollY1 % itemHeight);
+        if (Math.abs(dy) > itemHeight / 2) {
+            if (scrollY1 < 0) {
+                mScroller1.startScroll(0, (int) scrollY1, 0, -itemHeight - dy);
+            } else {
+                mScroller1.startScroll(0, (int) scrollY1, 0, itemHeight - dy);
+            }
+        } else {
+            mScroller1.startScroll(0, (int) scrollY1, 0, -dy);
         }
     }
 
@@ -440,16 +460,4 @@ public class WheelView extends View {
     private float getBaseLine(int position) {
         return getBaseLine(paint, itemHeight * position, itemHeight);
     }
-
-    private class HashBean {
-
-        public HashBean(String showStr, Object backData) {
-            this.showStr = showStr;
-            this.backData = backData;
-        }
-
-        public String showStr;
-        public Object backData;
-    }
-
 }
