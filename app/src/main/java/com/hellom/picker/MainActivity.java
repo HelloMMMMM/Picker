@@ -1,4 +1,4 @@
-package com.hellom.wheelview;
+package com.hellom.picker;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;

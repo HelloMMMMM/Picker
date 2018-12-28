@@ -1,4 +1,4 @@
-package com.hellom.wheelview;
+package com.hellom.picker;
 
 import android.content.Context;
 import android.graphics.Canvas;
