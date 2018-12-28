@@ -4,21 +4,21 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <com.hellom.picker.WheelView
+    <com.hellom.wheelview.WheelView
         android:id="@+id/year_picker"
         android:layout_width="0dp"
         android:layout_height="180dp"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toLeftOf="@+id/month_picker" />
 
-    <com.hellom.picker.WheelView
+    <com.hellom.wheelview.WheelView
         android:id="@+id/month_picker"
         android:layout_width="0dp"
         android:layout_height="180dp"
         app:layout_constraintLeft_toRightOf="@id/year_picker"
         app:layout_constraintRight_toLeftOf="@+id/day_picker" />
 
-    <com.hellom.picker.WheelView
+    <com.hellom.wheelview.WheelView
         android:id="@+id/day_picker"
         android:layout_width="0dp"
         android:layout_height="180dp"

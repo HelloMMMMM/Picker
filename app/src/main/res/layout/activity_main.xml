@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <com.hellom.picker.WheelView
+    <com.hellom.wheelview.WheelView
         android:id="@+id/wheel"
         android:layout_width="match_parent"
         android:layout_height="250dp" />
