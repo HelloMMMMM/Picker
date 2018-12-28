@@ -10,10 +10,7 @@ import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
 import android.widget.OverScroller;
-import android.widget.Scroller;
 
-
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -21,11 +18,9 @@ import java.util.List;
  */
 public class WheelView extends View {
     /**
-     * 各级联区域滚动Y值
+     * 滚动Y值
      */
-    private float scrollY1 = 0;
-    private float scrollY2 = 0;
-    private float scrollY3 = 0;
+    private float scrollY = 0;
     /**
      * 显示的item个数，默认为5
      */
@@ -60,31 +55,26 @@ public class WheelView extends View {
      */
     private int itemHeight;
     /**
-     * item宽度
+     * item的X位置
      */
-    private int itemWidth;
+    private int itemX;
     /**
-     * 各级联item的X位置
+     * 可滚动的最小Y值,用于判断上拉超出
      */
-    private int itemX1;
-    /**
-     * 各级联数据区域可滚动的最小Y值,用于判断上拉超出
-     */
-    private int minScrollY1;
+    private int minScrollY;
     /**
      * 可滚动最大Y值，用于判断下拉超出
      */
     private int maxScrollY;
     /**
-     * 各级联区域数据真实高度
+     * 数据真实高度
      */
-    private int realHeight1;
+    private int realHeight;
     /**
      * 中心item上下边距
      */
     private float centerItemTop;
     private float centerItemBottom;
-
     /**
      * 内容绘制paint
      */
@@ -100,15 +90,11 @@ public class WheelView extends View {
     /**
      * 上次操作的坐标以及按下时候的坐标
      */
-    private float lastY, downY;
+    private float lastY;
     /**
-     * 按下时的时间
+     * 滚动器
      */
-    private long downTime;
-    /**
-     * 各级联区域滚动器
-     */
-    private OverScroller mScroller1;
+    private OverScroller mScroller;
     /**
      * 用于标识一些基本参数是否已经初始化
      */
@@ -118,33 +104,33 @@ public class WheelView extends View {
      */
     private float scaleDensity;
     /**
-     * 数据级联层数,默认一级
-     */
-    public static final int LEVEL_ONE = 1;
-    public static final int LEVEL_TWO = 2;
-    public static final int LEVEL_THREE = 3;
-    private int level = LEVEL_ONE;
-    /**
      * 数据
      */
-    private List<String> levelOneData;
+    private List<String> data;
     /**
      * 各级联数据数量
      */
-    private int levelDataSize1 = 0;
-    /**
-     * 当前触摸级联区域
-     */
-    private int currentTouchLevel = LEVEL_ONE;
+    private int dataSize = 0;
     /**
      * 速度检测器
      */
     private VelocityTracker mVelocityTracker;
-
     /**
      * 滚动速率单位，用于fling动作时获取速率(单位时间滚动的像素)
      */
-    private final int VELOCITY_UNITS = 300;
+    private static final int VELOCITY_UNITS = 300;
+    /**
+     * 滚动速率最大最小值
+     */
+    private static final int MIN_VELOCITY = 1000;
+    private static final int MAX_VELOCITY = 6000;
+    /**
+     * 手势模式
+     */
+    private int mode = MODE_NONE;
+    private static final int MODE_NONE = 0;
+    private static final int MODE_DRAG = 1;
+    private static final int MODE_FLING = 2;
 
     public WheelView(Context context) {
         this(context, null);
@@ -161,7 +147,7 @@ public class WheelView extends View {
 
     private void init() {
         scaleDensity = getResources().getDisplayMetrics().scaledDensity;
-        mScroller1 = new OverScroller(getContext());
+        mScroller = new OverScroller(getContext());
         paint = new Paint();
         paint.setAntiAlias(true);
         paint.setTextSize(scaleDensity * textSize);
@@ -171,32 +157,6 @@ public class WheelView extends View {
         if (showSize % evenNUmber2 == 0) {
             showSize += 1;
         }
-    }
-
-    /**
-     * 设置一级数据
-     *
-     * @param levelOneData 一级数据
-     */
-    public void setLevelOneData(List<String> levelOneData) {
-        if (level < LEVEL_ONE) {
-            return;
-        }
-        this.levelOneData = levelOneData;
-        levelDataSize1 = levelOneData == null ? 0 : levelOneData.size();
-        notifyDataSetChanged();
-    }
-
-    /**
-     * 设置级联层数
-     *
-     * @param level 级联层数
-     */
-    public void setLevel(int level) {
-        if (level < LEVEL_ONE || level > LEVEL_THREE) {
-            throw new IllegalArgumentException("only support 1~3 level,please use static constant:LEVEL_ONE,LEVEL_TWO,LEVEL_THREE");
-        }
-        this.level = level;
     }
 
     public void setTextColor(int textColor) {
@@ -215,6 +175,12 @@ public class WheelView extends View {
         invalidate();
     }
 
+    public void setData(List<String> data) {
+        this.data = data;
+        dataSize = data == null ? 0 : data.size();
+        notifyDataSetChanged();
+    }
+
     public void notifyDataSetChanged() {
         isStart = true;
         invalidate();
@@ -230,11 +196,11 @@ public class WheelView extends View {
             centerItemTop = temp1 / 2 + getPaddingTop() - itemHeight / 2;
             centerItemBottom = temp1 / 2 + getPaddingTop() + itemHeight / 2;
 
-            itemWidth = width / level;
-            itemX1 = itemWidth / 2;
+            itemX = width / 2;
 
+            realHeight = dataSize * itemHeight;
             int temp2 = (showSize + 1) / 2 * itemHeight;
-            minScrollY1 = temp2 - getRealHeight1();
+            minScrollY = temp2 - realHeight;
             maxScrollY = (showSize - 1) / 2 * itemHeight;
 
             int[] colors = new int[]{0xFFFFFFFF, 0xAAFFFFFF, 0x00FFFFFF, 0x00FFFFFF, 0xAAFFFFFF, 0xFFFFFFFF};
@@ -248,18 +214,12 @@ public class WheelView extends View {
 
     @Override
     public void computeScroll() {
-        switch (currentTouchLevel) {
-            case LEVEL_ONE:
-                if (mScroller1.computeScrollOffset()) {
-                    scrollY1 = mScroller1.getCurrY();
-                } else {
-                    if (scrollY1 >= minScrollY1 && scrollY1 <= maxScrollY) {
-                        correctScrollY();
-                    }
-                }
-                break;
-            default:
-                break;
+        if (mScroller.computeScrollOffset()) {
+            scrollY = mScroller.getCurrY();
+        } else {
+            if (scrollY >= minScrollY && scrollY <= maxScrollY && mode == MODE_FLING) {
+                correctScrollY();
+            }
         }
         invalidate();
         super.computeScroll();
@@ -272,16 +232,16 @@ public class WheelView extends View {
         //设置绘制数据画笔
         paint.setColor(textColor);
         //绘制一级数据
-        if (levelDataSize1 > 0) {
-            int startItemPos = (int) -scrollY1 / itemHeight;
+        if (dataSize > 0) {
+            int startItemPos = (int) -scrollY / itemHeight;
             for (int i = startItemPos, j = 0; i < startItemPos + showSize + 2; j++, i++) {
-                float topY = j * itemHeight + scrollY1 % itemHeight;
-                if (i >= 0 && i < levelDataSize1) {
-                    canvas.drawText(levelOneData.get(i), itemX1, getBaseLine(paint, topY, itemHeight), paint);
+                float topY = j * itemHeight + scrollY % itemHeight;
+                if (i >= 0 && i < dataSize) {
+                    canvas.drawText(data.get(i), itemX, getBaseLine(paint, topY, itemHeight), paint);
                 } else {
                     if (isCircle) {
-                        int pos = i % levelDataSize1;
-                        canvas.drawText(levelOneData.get(pos < 0 ? pos + levelDataSize1 : pos), itemX1, getBaseLine(paint, topY, itemHeight), paint);
+                        int pos = i % dataSize;
+                        canvas.drawText(data.get(pos < 0 ? pos + dataSize : pos), itemX, getBaseLine(paint, topY, itemHeight), paint);
                     }
                 }
             }
@@ -307,20 +267,17 @@ public class WheelView extends View {
         mVelocityTracker.addMovement(event);
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
-                downTime = System.currentTimeMillis();
-                downY = event.getRawY();
-                lastY = downY;
-                performClick();
+                lastY = event.getRawY();
                 break;
             case MotionEvent.ACTION_MOVE:
                 float y = event.getRawY();
                 float dy = y - lastY;
-                pretendScrollY(dy);
+                updateScrollY(dy);
                 lastY = y;
                 break;
             case MotionEvent.ACTION_UP:
+                performClick();
                 checkStateAndPosition();
-                invalidate();
                 break;
             default:
                 break;
@@ -328,128 +285,50 @@ public class WheelView extends View {
         return true;
     }
 
-    /*private void whereIsTouch() {
-        //记录当前点击区域，若前一次滚动未结束，手动结束
-        if (downX < itemWidth) {
-            if (!mScroller1.isFinished()) {
-                mScroller1.abortAnimation();
-                scrollY1 = mScroller1.getCurrY();
-            }
-            currentTouchLevel = LEVEL_ONE;
-        } else if (downX < itemWidth * 2 && downX > itemWidth) {
-            if (!mScroller2.isFinished()) {
-                mScroller2.abortAnimation();
-                scrollY2 = mScroller2.getCurrY();
-            }
-            currentTouchLevel = LEVEL_TWO;
-        } else {
-            if (!mScroller3.isFinished()) {
-                mScroller3.abortAnimation();
-                scrollY3 = mScroller3.getCurrY();
-            }
-            currentTouchLevel = LEVEL_THREE;
-        }
-    }*/
-
-    private int getRealHeight1() {
-        if (realHeight1 == 0) {
-            realHeight1 = levelDataSize1 * itemHeight;
-        }
-        return realHeight1;
-    }
-
     private void checkStateAndPosition() {
-        //获取对应区域的变量
-        int minScrollY;
-        float scrollY;
-        OverScroller mScroller;
-        switch (currentTouchLevel) {
-            case LEVEL_ONE:
-                minScrollY = minScrollY1;
-                scrollY = scrollY1;
-                mScroller = mScroller1;
-                break;
-            default:
-                minScrollY = minScrollY1;
-                scrollY = scrollY1;
-                mScroller = mScroller1;
-                break;
-        }
-        if (!isCircle && scrollY < minScrollY) {
-            //上拉超出
-            mScroller.startScroll(0, (int) scrollY, 0, minScrollY - (int) scrollY, 400);
-        } else if (!isCircle && scrollY > maxScrollY) {
-            //下拉超出
-            mScroller.startScroll(0, (int) scrollY, 0, maxScrollY - (int) scrollY, 400);
-        } else {
-            long endTime = System.currentTimeMillis();
-
-            long ds = endTime - downTime;
-            mVelocityTracker.computeCurrentVelocity(300);
-            int speed = (int) mVelocityTracker.getYVelocity();
-
-            //正常情况(滑动距离，和手指滑动距离成正比，和滑动时间成反比)
-            //int finalY = (int) ((scrollY + dy * speed));
-            if (!isCircle) {
-
-                /*int dy = (int) (scrollY + speed) % itemHeight;
-                if (dy != 0) {
-                    speed += correctScrollY(dy);
-                }*/
-                mScroller.fling(0, (int) scrollY, 0, speed, 0, 0, minScrollY1, maxScrollY);
-
-              /*  if (finalY < minScrollY) {
-                    finalY = minScrollY;
-                } else if (finalY > maxScrollY) {
-                    finalY = maxScrollY;
+        if (!isCircle) {
+            if (scrollY < minScrollY) {
+                //上拉超出
+                mScroller.startScroll(0, (int) scrollY, 0, minScrollY - (int) scrollY, 400);
+            } else if (scrollY > maxScrollY) {
+                //下拉超出
+                mScroller.startScroll(0, (int) scrollY, 0, maxScrollY - (int) scrollY, 400);
+            } else {
+                //正常范围内，判断拖拽和抛出的手势，分开处理
+                mVelocityTracker.computeCurrentVelocity(VELOCITY_UNITS, MAX_VELOCITY);
+                int speed = (int) mVelocityTracker.getYVelocity();
+                if (Math.abs(speed) < MIN_VELOCITY) {
+                    mode = MODE_DRAG;
+                    correctScrollY();
+                } else {
+                    mode = MODE_FLING;
+                    mScroller.fling(0, (int) scrollY, 0, speed, 0, 0, minScrollY, maxScrollY);
                 }
-                 mScroller.startScroll(0, (int) scrollY, 0, (int) (finalY - scrollY), 400);*/
-/*
-                //超出startScroll方法250ms滑动持续时间且滑动距离大于item高度的一半
-                if (Math.abs(dy) > itemHeight / 2) {
-                    if (scrollY < 0) {
-                        //向上滑，dy为负，(-itemHeight-dy)为负，向下弹回
-                        mScroller.startScroll(0, (int) scrollY, 0, -itemHeight - dy);
-                    } else {
-                        //向下滑，dy为正，(itemHeight-dy)为正，向上弹回
-                        mScroller.startScroll(0, (int) scrollY, 0, itemHeight - dy);
-                    }
-                } else if (Math.abs(dy) <= itemHeight / 2) {
-                    //不足滑动距离
-                    mScroller.startScroll(0, (int) scrollY, 0, -dy);
-                }*/
+                mVelocityTracker.recycle();
+                mVelocityTracker = null;
             }
         }
     }
 
     private void correctScrollY() {
-        int dy = (int) (scrollY1 % itemHeight);
-        if (Math.abs(dy) > itemHeight / 2) {
-            if (scrollY1 < 0) {
-                mScroller1.startScroll(0, (int) scrollY1, 0, -itemHeight - dy);
+        int dy = (int) (scrollY % itemHeight);
+        int correctGuide = itemHeight / 2;
+        if (Math.abs(dy) > correctGuide) {
+            //滚动超出item一半的修正
+            if (scrollY < 0) {
+                mScroller.startScroll(0, (int) scrollY, 0, -itemHeight - dy);
             } else {
-                mScroller1.startScroll(0, (int) scrollY1, 0, itemHeight - dy);
+                mScroller.startScroll(0, (int) scrollY, 0, itemHeight - dy);
             }
         } else {
-            mScroller1.startScroll(0, (int) scrollY1, 0, -dy);
+            //滚动剩余部分不超出item高度一半的修正
+            mScroller.startScroll(0, (int) scrollY, 0, -dy);
         }
+        mode = MODE_NONE;
     }
 
-    private void pretendScrollY(float dy) {
-        switch (currentTouchLevel) {
-            case LEVEL_ONE:
-                scrollY1 += dy;
-                break;
-            case LEVEL_TWO:
-                scrollY2 += dy;
-                break;
-            case LEVEL_THREE:
-                scrollY3 += dy;
-                break;
-            default:
-                break;
-        }
-        invalidate();
+    private void updateScrollY(float dy) {
+        scrollY += dy;
     }
 
     private float getBaseLine(Paint paint, float top, float height) {
