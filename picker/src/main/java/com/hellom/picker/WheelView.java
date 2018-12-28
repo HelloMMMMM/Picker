@@ -1,4 +1,4 @@
-package com.hellom.wheelview;
+package com.hellom.picker;
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -66,10 +66,6 @@ public class WheelView extends View {
      * 可滚动最大Y值，用于判断下拉超出
      */
     private int maxScrollY;
-    /**
-     * 数据真实高度
-     */
-    private int realHeight;
     /**
      * 中心item上下边距
      */
@@ -198,8 +194,8 @@ public class WheelView extends View {
 
             itemX = width / 2;
 
-            realHeight = dataSize * itemHeight;
             int temp2 = (showSize + 1) / 2 * itemHeight;
+            int realHeight = dataSize * itemHeight;
             minScrollY = temp2 - realHeight;
             maxScrollY = (showSize - 1) / 2 * itemHeight;
 
@@ -234,7 +230,8 @@ public class WheelView extends View {
         //绘制一级数据
         if (dataSize > 0) {
             int startItemPos = (int) -scrollY / itemHeight;
-            for (int i = startItemPos, j = 0; i < startItemPos + showSize + 2; j++, i++) {
+            int halfShowSize = showSize / 2;
+            for (int i = startItemPos, j = 0; i < startItemPos + showSize + halfShowSize; j++, i++) {
                 float topY = j * itemHeight + scrollY % itemHeight;
                 if (i >= 0 && i < dataSize) {
                     canvas.drawText(data.get(i), itemX, getBaseLine(paint, topY, itemHeight), paint);
@@ -334,9 +331,5 @@ public class WheelView extends View {
     private float getBaseLine(Paint paint, float top, float height) {
         Paint.FontMetricsInt fontMetrics = paint.getFontMetricsInt();
         return (2 * top + height - fontMetrics.bottom - fontMetrics.top) / 2;
-    }
-
-    private float getBaseLine(int position) {
-        return getBaseLine(paint, itemHeight * position, itemHeight);
     }
 }
