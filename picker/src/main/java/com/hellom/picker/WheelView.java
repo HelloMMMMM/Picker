@@ -2,6 +2,7 @@ package com.hellom.picker;
 
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.LinearGradient;
 import android.graphics.Paint;
 import android.graphics.Shader;
@@ -36,11 +37,11 @@ public class WheelView extends View {
     /**
      * 文字颜色
      */
-    private int textColor = 0xFF000000;
+    private int textColor = 0xFF333333;
     /**
      * 线条的颜色
      */
-    private int lineColor = 0xFF888888;
+    private int lineColor = 0xFFd1d1d1;
 
     /**
      * view总宽度
@@ -100,6 +101,10 @@ public class WheelView extends View {
      */
     private float scaleDensity;
     /**
+     * 单位dp大小
+     */
+    private float density;
+    /**
      * 数据
      */
     private List<String> data;
@@ -143,6 +148,7 @@ public class WheelView extends View {
 
     private void init() {
         scaleDensity = getResources().getDisplayMetrics().scaledDensity;
+        density = getResources().getDisplayMetrics().density;
         mScroller = new OverScroller(getContext());
         paint = new Paint();
         paint.setAntiAlias(true);
@@ -225,6 +231,7 @@ public class WheelView extends View {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         measureData();
+        canvas.drawColor(Color.WHITE);
         //设置绘制数据画笔
         paint.setColor(textColor);
         //绘制一级数据
@@ -245,6 +252,7 @@ public class WheelView extends View {
         }
         //绘制中间的线条和遮罩层
         paint.setColor(lineColor);
+        paint.setStrokeWidth(density);
         canvas.drawLine(getPaddingLeft(), centerItemTop, width - getPaddingRight(), centerItemTop, paint);
         canvas.drawLine(getPaddingLeft(), centerItemBottom, width - getPaddingRight(), centerItemBottom, paint);
         coverPaint.setShader(shader);

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="bottom_dialog_fragment">
+        <item name="android:windowFrame">@null</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowIsFloating">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowMinWidthMajor">90%</item>
+        <item name="android:windowMinWidthMinor">90%</item>
+        <item name="android:windowAnimationStyle">@style/bottom_dialog_fragment_anim</item>
+    </style>
+
+    <style name="bottom_dialog_fragment_anim" parent="android:Animation">
+        <item name="android:windowEnterAnimation">@anim/bottom_dialog_fragment_enter</item>
+        <item name="android:windowExitAnimation">@anim/bottom_dialog_fragment_exit</item>
+    </style>
+</resources>

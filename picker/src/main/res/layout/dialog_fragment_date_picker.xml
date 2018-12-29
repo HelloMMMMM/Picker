@@ -2,7 +2,7 @@
 <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="wrap_content">
 
     <com.hellom.picker.WheelView
         android:id="@+id/year_picker"
@@ -24,4 +24,38 @@
         android:layout_height="180dp"
         app:layout_constraintLeft_toRightOf="@id/month_picker"
         app:layout_constraintRight_toRightOf="parent" />
+
+    <TextView
+        android:id="@+id/tv_cancel"
+        android:layout_width="0dp"
+        android:layout_height="48dp"
+        android:background="@drawable/dialog_fragment_cancel_btn_bg"
+        android:gravity="center"
+        android:text="@string/cancel"
+        android:textSize="15sp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toLeftOf="@+id/tv_sure"
+        app:layout_constraintTop_toBottomOf="@id/year_picker" />
+
+    <TextView
+        android:id="@+id/tv_sure"
+        android:layout_width="0dp"
+        android:layout_height="48dp"
+        android:background="@drawable/dialog_fragment_sure_btn_bg"
+        android:gravity="center"
+        android:text="@string/sure"
+        android:textColor="@color/C2"
+        android:textSize="15sp"
+        app:layout_constraintLeft_toRightOf="@id/tv_cancel"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/year_picker" />
+
+    <View
+        android:id="@+id/divider"
+        android:layout_width="0dp"
+        android:layout_height="1dp"
+        android:background="@color/C7"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="@id/tv_sure" />
 </android.support.constraint.ConstraintLayout>
