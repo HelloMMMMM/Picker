@@ -1,4 +1,4 @@
-package com.hellom.picker;
+package com.hellom.wheelview;
 
 import org.junit.Test;
 

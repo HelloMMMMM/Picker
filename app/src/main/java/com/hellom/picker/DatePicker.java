@@ -1,4 +1,4 @@
-package com.hellom.wheelview;
+package com.hellom.picker;
 
 import android.app.Dialog;
 import android.graphics.Color;

@@ -1,4 +1,4 @@
-package com.hellom.wheelview;
+package com.hellom.picker;
 
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
@@ -6,8 +6,6 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
 
-
-import com.hellom.picker.WheelView;
 
 import java.util.ArrayList;
 import java.util.List;
