@@ -1,4 +1,4 @@
-package com.hellom.picker;
+package com.hellom.picker1;
 
 import org.junit.Test;
 

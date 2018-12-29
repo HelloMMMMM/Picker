@@ -1,4 +1,4 @@
-package com.hellom.picker;
+package com.hellom.picker1;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
