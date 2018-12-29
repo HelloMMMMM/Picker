@@ -50,7 +50,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         if (fragmentManager != null) {
             DatePicker datePicker = (DatePicker) fragmentManager.findFragmentByTag("datePicker");
             if (datePicker == null) {
-                datePicker = new DatePicker();
+                datePicker = DatePicker.newInstance();
             }
             datePicker.show(fragmentManager, "datePicker");
         }

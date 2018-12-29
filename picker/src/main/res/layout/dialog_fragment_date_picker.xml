@@ -2,26 +2,27 @@
 <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:background="@color/C5">
 
     <com.hellom.picker.WheelView
         android:id="@+id/year_picker"
         android:layout_width="0dp"
-        android:layout_height="180dp"
+        android:layout_height="250dp"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toLeftOf="@+id/month_picker" />
 
     <com.hellom.picker.WheelView
         android:id="@+id/month_picker"
         android:layout_width="0dp"
-        android:layout_height="180dp"
+        android:layout_height="250dp"
         app:layout_constraintLeft_toRightOf="@id/year_picker"
         app:layout_constraintRight_toLeftOf="@+id/day_picker" />
 
     <com.hellom.picker.WheelView
         android:id="@+id/day_picker"
         android:layout_width="0dp"
-        android:layout_height="180dp"
+        android:layout_height="250dp"
         app:layout_constraintLeft_toRightOf="@id/month_picker"
         app:layout_constraintRight_toRightOf="parent" />
 

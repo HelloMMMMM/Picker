@@ -7,6 +7,7 @@ import android.graphics.LinearGradient;
 import android.graphics.Paint;
 import android.graphics.Shader;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
@@ -27,9 +28,9 @@ public class WheelView extends View {
      */
     private int showSize = 5;
     /**
-     * 文字大小，默认14sp
+     * 文字大小，默认16sp
      */
-    private float textSize = 14;
+    private float textSize = 16;
     /**
      * 是否可以循环滚动
      */
@@ -178,6 +179,7 @@ public class WheelView extends View {
     }
 
     public void setData(List<String> data) {
+        reset();
         this.data = data;
         dataSize = data == null ? 0 : data.size();
         notifyDataSetChanged();
@@ -290,6 +292,13 @@ public class WheelView extends View {
         return true;
     }
 
+    @Override
+    protected void onScrollChanged(int l, int t, int oldl, int oldt) {
+        super.onScrollChanged(l, t, oldl, oldt);
+        int position = (int) Math.abs(scrollY / itemHeight);
+        Log.e("mx", "position:" + position);
+    }
+
     private void checkStateAndPosition() {
         if (!isCircle) {
             if (scrollY < minScrollY) {
@@ -339,5 +348,24 @@ public class WheelView extends View {
     private float getBaseLine(Paint paint, float top, float height) {
         Paint.FontMetricsInt fontMetrics = paint.getFontMetricsInt();
         return (2 * top + height - fontMetrics.bottom - fontMetrics.top) / 2;
+    }
+
+    private void reset() {
+        scrollY = 0;
+        if (mScroller != null && !mScroller.isFinished()) {
+            mScroller.abortAnimation();
+        }
+        if (data != null) {
+            data.clear();
+            data = null;
+        }
+        dataSize = 0;
+    }
+
+    /**
+     * 滚动监听接口
+     */
+    public interface OnScrollChanged {
+
     }
 }
