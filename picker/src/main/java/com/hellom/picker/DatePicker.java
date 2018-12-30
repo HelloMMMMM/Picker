@@ -19,14 +19,26 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
+
 /**
- * @author mx
+ * author:helloM
+ * email:1694327880@qq.com
  */
 public class DatePicker extends DialogFragment implements View.OnClickListener {
 
     private WheelView yearList, monthList, dayList;
     private int currentYear, currentMonth, currentDay;
-    private List<String> yearData, monthData, dayData;
+
+    /**
+     * 年份半数范围
+     */
+    private int yearHalfRange = 150;
+
+    private OnDateSelectedListener mOnDateSelectedListener;
+
+    public void setOnDateSelectedListener(OnDateSelectedListener mOnDateSelectedListener) {
+        this.mOnDateSelectedListener = mOnDateSelectedListener;
+    }
 
     public static DatePicker newInstance() {
         Bundle args = new Bundle();
@@ -82,7 +94,6 @@ public class DatePicker extends DialogFragment implements View.OnClickListener {
         yearList = view.findViewById(R.id.year_picker);
         monthList = view.findViewById(R.id.month_picker);
         dayList = view.findViewById(R.id.day_picker);
-        monthList.setCircle(true);
     }
 
     private void initListener(View view) {
@@ -91,43 +102,47 @@ public class DatePicker extends DialogFragment implements View.OnClickListener {
         yearList.setOnSelectedChangedListener(new WheelView.OnSelectedChangedListener() {
             @Override
             public void onSelectedChanged() {
-                Log.e("mx", "data:" + yearList.getSelectedItemData());
+                try {
+                    currentYear = Integer.parseInt(yearList.getSelectedItemData());
+                    dayList.setData(initDayData(currentYear, currentMonth));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         });
         monthList.setOnSelectedChangedListener(new WheelView.OnSelectedChangedListener() {
             @Override
             public void onSelectedChanged() {
-                Log.e("mx", "data:" + monthList.getSelectedItemData());
-                //dayData.add(String.valueOf(dayData.size() + 1));
-                //dayList.setData(dayData);
+                try {
+                    currentMonth = Integer.parseInt(monthList.getSelectedItemData());
+                    dayList.setData(initDayData(currentYear, currentMonth));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        dayList.setOnSelectedChangedListener(new WheelView.OnSelectedChangedListener() {
+            @Override
+            public void onSelectedChanged() {
+                try {
+                    currentDay = Integer.parseInt(dayList.getSelectedItemData());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         });
     }
 
     private void initData() {
-        Calendar calendar = Calendar.getInstance();
-        currentYear = calendar.get(Calendar.YEAR);
-        currentMonth = calendar.get(Calendar.MONTH) + 1;
-        currentDay = calendar.get(Calendar.DAY_OF_MONTH);
-        yearData = new ArrayList<>();
-        for (int i = currentYear - 100; i < currentYear + 100; i++) {
-            yearData.add(String.valueOf(i));
-        }
-        monthData = new ArrayList<>();
-        for (int i = 1; i <= 12; i++) {
-            monthData.add(String.valueOf(i));
-        }
-        dayData = new ArrayList<>();
-        calendar.set(currentYear, currentMonth, 0);
-        for (int i = 1; i <= calendar.get(Calendar.DAY_OF_MONTH); i++) {
-            dayData.add(String.valueOf(i));
-        }
-        yearList.setData(yearData);
-        monthList.setData(monthData);
-        monthList.setSelectedItem(8);
-        dayList.setData(dayData);
-        dayList.setSelectedItem(0);
-        Log.e("mx", dayList.getSelectedItemData());
+        currentYear = getCurrentYear();
+        currentMonth = getCurrentMonth();
+        currentDay = getCurrentDayOfMonth();
+        yearList.setData(initYearData(currentYear));
+        yearList.setSelectedItem(String.valueOf(currentYear));
+        monthList.setData(initMonthData());
+        monthList.setSelectedItem(String.valueOf(currentMonth));
+        dayList.setData(initDayData(currentYear, currentMonth));
+        dayList.setSelectedItem(String.valueOf(currentDay));
     }
 
     @Override
@@ -136,7 +151,69 @@ public class DatePicker extends DialogFragment implements View.OnClickListener {
         if (id == R.id.tv_cancel) {
             dismiss();
         } else if (id == R.id.tv_sure) {
+            if (mOnDateSelectedListener != null) {
+                mOnDateSelectedListener.onDateSelected(yearList.getSelectedItemData(), monthList.getSelectedItemData(), dayList.getSelectedItemData());
+            }
             dismiss();
         }
+    }
+
+    private int getCurrentYear() {
+        Calendar calendar = Calendar.getInstance();
+        return calendar.get(Calendar.YEAR);
+    }
+
+    private int getCurrentMonth() {
+        Calendar calendar = Calendar.getInstance();
+        return calendar.get(Calendar.MONTH) + 1;
+    }
+
+    private int getCurrentDayOfMonth() {
+        Calendar calendar = Calendar.getInstance();
+        return calendar.get(Calendar.DAY_OF_MONTH);
+    }
+
+    private int getDayOfMonth(int year, int month) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(year, month, 0);
+        return calendar.get(Calendar.DAY_OF_MONTH);
+    }
+
+    private List<String> initDayData(int year, int month) {
+        int dayOfMonth = getDayOfMonth(year, month);
+        List<String> dayData = new ArrayList<>(dayOfMonth);
+        for (int i = 1; i <= dayOfMonth; i++) {
+            dayData.add(String.valueOf(i));
+        }
+        return dayData;
+    }
+
+    private List<String> initMonthData() {
+        int monthCount = 12;
+        List<String> monthData = new ArrayList<>(monthCount);
+        for (int i = 1; i <= monthCount; i++) {
+            monthData.add(String.valueOf(i));
+        }
+        return monthData;
+    }
+
+    private List<String> initYearData(int currentYear) {
+        int yearCount = yearHalfRange * 2 + 1;
+        List<String> yearData = new ArrayList<>(yearCount);
+        for (int i = currentYear - yearHalfRange; i <= currentYear + yearHalfRange; i++) {
+            yearData.add(String.valueOf(i));
+        }
+        return yearData;
+    }
+
+    public interface OnDateSelectedListener {
+        /**
+         * 日期选择回调
+         *
+         * @param year  年
+         * @param month 月
+         * @param day   日
+         */
+        void onDateSelected(String year, String month, String day);
     }
 }

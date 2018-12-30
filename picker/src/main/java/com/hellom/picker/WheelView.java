@@ -16,7 +16,8 @@ import android.widget.OverScroller;
 import java.util.List;
 
 /**
- * @author mx
+ * author:helloM
+ * email:1694327880@qq.com
  */
 public class WheelView extends View {
     /**
@@ -55,11 +56,15 @@ public class WheelView extends View {
     /**
      * item行高度
      */
-    private int itemHeight;
+    private int itemHeight = 0;
     /**
      * item的X位置(文字)
      */
     private int itemX;
+    /**
+     * 选中item文字位置偏移
+     */
+    private int offsetX;
     /**
      * 可滚动的最小Y值,用于判断上拉超出
      */
@@ -140,80 +145,16 @@ public class WheelView extends View {
      */
     private OnSelectedChangedListener mOnSelectedChangedListener;
 
-    public WheelView(Context context) {
-        this(context, null);
-    }
-
-    public WheelView(Context context, AttributeSet attrs) {
-        this(context, attrs, 0);
-    }
-
-    public WheelView(Context context, AttributeSet attrs, int defStyleAttr) {
-        super(context, attrs, defStyleAttr);
-        init();
-    }
-
-    private void init() {
-        scaleDensity = getResources().getDisplayMetrics().scaledDensity;
-        density = getResources().getDisplayMetrics().density;
-        mScroller = new OverScroller(getContext());
-        paint = new Paint();
-        paint.setAntiAlias(true);
-        paint.setTextSize(scaleDensity * textSize);
-        paint.setTextAlign(Paint.Align.CENTER);
-        coverPaint = new Paint();
-        int evenNUmber2 = 2;
-        if (showSize % evenNUmber2 == 0) {
-            showSize += 1;
-        }
-        mGestureDetector = new GestureDetector(getContext(), new GestureDetector.OnGestureListener() {
-            @Override
-            public boolean onDown(MotionEvent e) {
-                //滚动未结束再次触碰，手动结束上次触碰
-                if (!mScroller.isFinished()) {
-                    mScroller.abortAnimation();
-                }
-                //按下时触发,false不传递无法触发scroll和fling
-                return true;
-            }
-
-            @Override
-            public void onShowPress(MotionEvent e) {
-            }
-
-            @Override
-            public boolean onSingleTapUp(MotionEvent e) {
-                //单击动作
-                performClick();
-                return false;
-            }
-
-            @Override
-            public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
-                //滑动模式(多次触发),返回值不影响手势检测器onTouchEvent的返回值
-                mode = MODE_DRAG;
-                scrollY += -distanceY;
-                return true;
-            }
-
-            @Override
-            public void onLongPress(MotionEvent e) {
-            }
-
-            @Override
-            public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-                //抛模式(手指抬起时且速度大于一定值触发),返回false时手势检测器onTouchEvent返回false
-                mode = MODE_FLING;
-                mScroller.fling(0, (int) scrollY, 0, (int) (velocityRate * velocityY), 0, 0, minScrollY, maxScrollY);
-                return false;
-            }
-        });
-    }
-
+    /**
+     * 获取选中item数据
+     */
     public String getSelectedItemData() {
         return selectedItemPosition == -1 ? "" : data.get(selectedItemPosition);
     }
 
+    /**
+     * 设置选中item监听
+     */
     public void setOnSelectedChangedListener(OnSelectedChangedListener mOnSelectedChangedListener) {
         this.mOnSelectedChangedListener = mOnSelectedChangedListener;
     }
@@ -234,18 +175,54 @@ public class WheelView extends View {
     }
 
     /**
-     * 设置选中的item位置
+     * 根据所在数据源的位置设置选中的item位置
      */
-    public void setSelectedItem(int position) {
+    public void setSelectedItemPosition(int position) {
         if (position >= 0 && position < dataSize) {
             selectedItemPosition = position;
             notifyDataSetChanged();
         }
     }
 
+    /**
+     * 根据内容设置选中item位置
+     */
+    public void setSelectedItem(String value) {
+        if (dataSize > 0) {
+            int position = data.indexOf(value);
+            if (position >= 0) {
+                selectedItemPosition = position;
+                notifyDataSetChanged();
+            }
+        }
+    }
+
+    /**
+     * 设置显示出来的条目个数
+     */
+    public void setShowSize(int showSize) {
+        int evenNUmber2 = 2;
+        if (showSize % evenNUmber2 == 0) {
+            showSize += 1;
+        }
+        this.showSize = showSize;
+        notifyDataSetChanged();
+    }
+
+    /**
+     * 文字颜色设置
+     */
     public void setTextColor(int textColor) {
         this.textColor = textColor;
         invalidate();
+    }
+
+    /**
+     * 设置选中item文字位置偏移,负数为向左偏移,正数为向右偏移
+     */
+    public void setOffsetX(int offsetX) {
+        this.offsetX = offsetX;
+        notifyDataSetChanged();
     }
 
     /**
@@ -283,9 +260,91 @@ public class WheelView extends View {
         notifyDataSetChanged();
     }
 
+    /**
+     * 通知重新计算
+     */
     private void notifyDataSetChanged() {
         isStart = true;
         invalidate();
+    }
+
+    public interface OnSelectedChangedListener {
+        /**
+         * 选中条目变化监听
+         */
+        void onSelectedChanged();
+    }
+
+
+    public WheelView(Context context) {
+        this(context, null);
+    }
+
+    public WheelView(Context context, AttributeSet attrs) {
+        this(context, attrs, 0);
+    }
+
+    public WheelView(Context context, AttributeSet attrs, int defStyleAttr) {
+        super(context, attrs, defStyleAttr);
+        init();
+    }
+
+    private void init() {
+        scaleDensity = getResources().getDisplayMetrics().scaledDensity;
+        density = getResources().getDisplayMetrics().density;
+        mScroller = new OverScroller(getContext());
+        paint = new Paint();
+        paint.setAntiAlias(true);
+        paint.setTextSize(scaleDensity * textSize);
+        paint.setTextAlign(Paint.Align.CENTER);
+        coverPaint = new Paint();
+        int evenNUmber2 = 2;
+        if (showSize % evenNUmber2 == 0) {
+            showSize += 1;
+        }
+        mGestureDetector = new GestureDetector(getContext(), new GestureDetector.OnGestureListener() {
+            @Override
+            public boolean onDown(MotionEvent e) {
+                //滚动未结束再次触碰，手动结束上次触碰
+                if (!mScroller.isFinished()) {
+                    mScroller.abortAnimation();
+                }
+                //onTouchEvent手动返回true时，手势检测所有回调返回值都不影响事件的接收
+                //若使用gestureDetector的onTouchEvent作为返回值，才受其影响
+                return true;
+            }
+
+            @Override
+            public void onShowPress(MotionEvent e) {
+            }
+
+            @Override
+            public boolean onSingleTapUp(MotionEvent e) {
+                //单击动作
+                performClick();
+                return true;
+            }
+
+            @Override
+            public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
+                //滑动模式(多次触发)
+                mode = MODE_DRAG;
+                scrollY += -distanceY;
+                return true;
+            }
+
+            @Override
+            public void onLongPress(MotionEvent e) {
+            }
+
+            @Override
+            public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+                //抛模式(手指抬起时且速度大于一定值触发)
+                mode = MODE_FLING;
+                mScroller.fling(0, (int) scrollY, 0, (int) (velocityRate * velocityY), 0, 0, minScrollY, maxScrollY);
+                return false;
+            }
+        });
     }
 
     private void measureData() {
@@ -296,6 +355,13 @@ public class WheelView extends View {
             itemHeight = temp1 / showSize;
             centerItemTop = temp1 / 2 + getPaddingTop() - itemHeight / 2;
             centerItemBottom = temp1 / 2 + getPaddingTop() + itemHeight / 2;
+            //文字绘制x位置以及选中item的偏移
+            int halfWidth = width / 2;
+            if (offsetX < -halfWidth) {
+                offsetX = -halfWidth;
+            } else if (offsetX > halfWidth) {
+                offsetX = halfWidth;
+            }
             itemX = width / 2;
             //滚动范围设置
             int temp2 = (showSize + 1) / 2 * itemHeight;
@@ -360,7 +426,12 @@ public class WheelView extends View {
             for (int i = startItemPos, j = 0; i < startItemPos + showSize + halfShowSize; j++, i++) {
                 float topY = j * itemHeight + scrollY % itemHeight;
                 if (i >= 0 && i < dataSize) {
+                   /* if (selectedItemPosition == i) {
+                        canvas.drawText(data.get(i), itemX + offsetX, getBaseLine(paint, topY, itemHeight), paint);
+                    } else {*/
+                    // TODO: 2018/12/31/031 偏移 
                     canvas.drawText(data.get(i), itemX, getBaseLine(paint, topY, itemHeight), paint);
+                    //}
                 } else {
                     if (isCircle) {
                         int pos = i % dataSize;
@@ -386,7 +457,11 @@ public class WheelView extends View {
     @SuppressLint("ClickableViewAccessibility")
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        //手势检测器传递了事件且是手指抬起动作，进行位置修正，针对滑动情况
+        //item高度为0或者无数据不处理事件
+        if (itemHeight == 0 || dataSize == 0) {
+            return false;
+        }
+        //处理滑动抬起时的位置修正、抛模式超出边界时的平滑回弹
         boolean detectedUp = event.getAction() == MotionEvent.ACTION_UP;
         if (!mGestureDetector.onTouchEvent(event) && detectedUp) {
             checkStateAndPosition();
@@ -479,12 +554,5 @@ public class WheelView extends View {
         }
         data = null;
         dataSize = 0;
-    }
-
-    public interface OnSelectedChangedListener {
-        /**
-         * 选中条目变化监听
-         */
-        void onSelectedChanged();
     }
 }

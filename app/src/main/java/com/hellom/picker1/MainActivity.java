@@ -5,6 +5,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.Toast;
 
 
 import com.hellom.picker.DatePicker;
@@ -23,10 +24,13 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
         final WheelView picker = findViewById(R.id.wheel);
         List<String> one = new ArrayList<>();
-        for (int i = 0; i < 500; i++) {
+        for (int i = 0; i < 3; i++) {
             one.add(String.valueOf(i));
         }
         picker.setData(one);
+        picker.setCircle(true);
+        picker.setSelectedItemPosition(50);
+        picker.setOffsetX(-30);
 
         findViewById(R.id.btn_1).setOnClickListener(this);
         findViewById(R.id.btn_2).setOnClickListener(this);
@@ -51,6 +55,12 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             DatePicker datePicker = (DatePicker) fragmentManager.findFragmentByTag("datePicker");
             if (datePicker == null) {
                 datePicker = DatePicker.newInstance();
+                datePicker.setOnDateSelectedListener(new DatePicker.OnDateSelectedListener() {
+                    @Override
+                    public void onDateSelected(String year, String month, String day) {
+                        Toast.makeText(MainActivity.this, year + "-" + month + "-" + day, Toast.LENGTH_SHORT).show();
+                    }
+                });
             }
             datePicker.show(fragmentManager, "datePicker");
         }

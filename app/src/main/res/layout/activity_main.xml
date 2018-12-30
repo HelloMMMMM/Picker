@@ -1,27 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.hellom.picker1.MainActivity">
 
-    <com.hellom.picker.WheelView
-        android:id="@+id/wheel"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="250dp" />
-
-    <Button
-        android:id="@+id/btn_1"
-        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent" />
+        android:orientation="vertical">
 
-    <Button
-        android:id="@+id/btn_2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintRight_toRightOf="parent" />
-</android.support.constraint.ConstraintLayout>
+        <Button
+            android:id="@+id/btn_1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/date_picker" />
+
+        <Button
+            android:id="@+id/btn_2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/address_picker" />
+
+        <com.hellom.picker.WheelView
+            android:id="@+id/wheel"
+            android:layout_width="match_parent"
+            android:layout_height="250dp" />
+    </LinearLayout>
+</ScrollView>

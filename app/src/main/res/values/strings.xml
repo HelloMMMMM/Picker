@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">WheelView</string>
+    <string name="date_picker">日期选择器</string>
+    <string name="address_picker">地址选择器</string>
 </resources>
