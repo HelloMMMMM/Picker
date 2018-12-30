@@ -82,6 +82,7 @@ public class DatePicker extends DialogFragment implements View.OnClickListener {
         yearList = view.findViewById(R.id.year_picker);
         monthList = view.findViewById(R.id.month_picker);
         dayList = view.findViewById(R.id.day_picker);
+        monthList.setCircle(true);
     }
 
     private void initListener(View view) {
@@ -97,8 +98,8 @@ public class DatePicker extends DialogFragment implements View.OnClickListener {
             @Override
             public void onSelectedChanged() {
                 Log.e("mx", "data:" + monthList.getSelectedItemData());
-                dayData.add(String.valueOf(dayData.size() + 1));
-                dayList.setData(dayData);
+                //dayData.add(String.valueOf(dayData.size() + 1));
+                //dayList.setData(dayData);
             }
         });
     }
@@ -123,7 +124,10 @@ public class DatePicker extends DialogFragment implements View.OnClickListener {
         }
         yearList.setData(yearData);
         monthList.setData(monthData);
+        monthList.setSelectedItem(8);
         dayList.setData(dayData);
+        dayList.setSelectedItem(0);
+        Log.e("mx", dayList.getSelectedItemData());
     }
 
     @Override

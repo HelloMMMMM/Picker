@@ -57,7 +57,7 @@ public class WheelView extends View {
      */
     private int itemHeight;
     /**
-     * item的X位置
+     * item的X位置(文字)
      */
     private int itemX;
     /**
@@ -92,7 +92,7 @@ public class WheelView extends View {
     /**
      * 用于标识一些基本参数是否已经初始化
      */
-    public boolean isStart = true;
+    private boolean isStart = true;
     /**
      * 单位sp大小
      */
@@ -106,7 +106,7 @@ public class WheelView extends View {
      */
     private List<String> data;
     /**
-     * 各级联数据数量
+     * 数据数量
      */
     private int dataSize = 0;
     /**
@@ -131,6 +131,10 @@ public class WheelView extends View {
      */
     private int lastSelectedItemPosition = -1;
     private int selectedItemPosition = -1;
+    /**
+     * 是否需要更新选中item位置
+     */
+    private boolean isNeedUpdateSelectedItemPosition = false;
     /**
      * 选中item变化监听
      */
@@ -229,22 +233,49 @@ public class WheelView extends View {
         }
     }
 
+    /**
+     * 设置选中的item位置
+     */
+    public void setSelectedItem(int position) {
+        if (position >= 0 && position < dataSize) {
+            selectedItemPosition = position;
+            notifyDataSetChanged();
+        }
+    }
+
     public void setTextColor(int textColor) {
         this.textColor = textColor;
         invalidate();
     }
 
+    /**
+     * 设置选中区域的线的颜色
+     */
     public void setLineColor(int lineColor) {
         this.lineColor = lineColor;
         invalidate();
     }
 
+    /**
+     * 设置是否循环滚动
+     */
+    public void setCircle(boolean circle) {
+        isCircle = circle;
+        notifyDataSetChanged();
+    }
+
+    /**
+     * 设置文字大小
+     */
     public void setTextSize(float textSize) {
         this.textSize = textSize;
         paint.setTextSize(scaleDensity * textSize);
         invalidate();
     }
 
+    /**
+     * 设置数据
+     */
     public void setData(List<String> data) {
         reset();
         this.data = data;
@@ -252,7 +283,7 @@ public class WheelView extends View {
         notifyDataSetChanged();
     }
 
-    public void notifyDataSetChanged() {
+    private void notifyDataSetChanged() {
         isStart = true;
         invalidate();
     }
@@ -266,15 +297,32 @@ public class WheelView extends View {
             centerItemTop = temp1 / 2 + getPaddingTop() - itemHeight / 2;
             centerItemBottom = temp1 / 2 + getPaddingTop() + itemHeight / 2;
             itemX = width / 2;
+            //滚动范围设置
             int temp2 = (showSize + 1) / 2 * itemHeight;
             int realHeight = dataSize * itemHeight;
-            minScrollY = temp2 - realHeight;
-            maxScrollY = (showSize - 1) / 2 * itemHeight;
-            lastSelectedItemPosition = selectedItemPosition = dataSize == 0 ? -1 : showSize / 2;
+            if (isCircle) {
+                minScrollY = Integer.MIN_VALUE;
+                maxScrollY = Integer.MAX_VALUE;
+            } else {
+                minScrollY = temp2 - realHeight;
+                maxScrollY = (showSize - 1) / 2 * itemHeight;
+            }
+            //设置选中position
+            int halfShowSize = showSize / 2;
+            if (dataSize == 0) {
+                lastSelectedItemPosition = selectedItemPosition = -1;
+            } else if (selectedItemPosition == -1) {
+                lastSelectedItemPosition = selectedItemPosition = halfShowSize;
+            } else {
+                lastSelectedItemPosition = selectedItemPosition;
+                scrollY = (halfShowSize - selectedItemPosition) * itemHeight;
+            }
+            //遮罩层相关
             int[] colors = new int[]{0xFFFFFFFF, 0xAAFFFFFF, 0x00FFFFFF, 0x00FFFFFF, 0xAAFFFFFF, 0xFFFFFFFF};
             float[] positions = new float[]{0.0f, centerItemTop / height, centerItemTop / height, centerItemBottom / height, centerItemBottom / height, 1.0f};
             shader = new LinearGradient(0, 0, 0, height, colors, positions, Shader.TileMode.REPEAT);
             coverPaint.setShader(shader);
+            //重新计算的标识
             isStart = false;
         }
     }
@@ -283,13 +331,17 @@ public class WheelView extends View {
     public void computeScroll() {
         if (mScroller.computeScrollOffset()) {
             scrollY = mScroller.getCurrY();
-            computeSelectedItemPosition();
+            isNeedUpdateSelectedItemPosition = true;
         } else {
             //抛模式结束后的修正
             if (mode == MODE_FLING) {
                 correctScrollY();
             }
-            onSelectedChanged();
+            //计算选中item位置
+            if (isNeedUpdateSelectedItemPosition) {
+                computeSelectedItemPosition();
+                onSelectedChanged();
+            }
         }
         invalidate();
         super.computeScroll();
@@ -346,15 +398,20 @@ public class WheelView extends View {
         if (!isCircle) {
             if (scrollY < minScrollY) {
                 //上拉超出
-                mScroller.startScroll(0, (int) scrollY, 0, minScrollY - (int) scrollY, 400);
+                mScroller.startScroll(0, (int) scrollY, 0, (int) (minScrollY - scrollY), 400);
             } else if (scrollY > maxScrollY) {
                 //下拉超出
-                mScroller.startScroll(0, (int) scrollY, 0, maxScrollY - (int) scrollY, 400);
+                mScroller.startScroll(0, (int) scrollY, 0, (int) (maxScrollY - scrollY), 400);
             } else {
                 //滑动情况下的位置修正
                 if (mode == MODE_DRAG) {
                     correctScrollY();
                 }
+            }
+        } else {
+            //滑动情况下的位置修正
+            if (mode == MODE_DRAG) {
+                correctScrollY();
             }
         }
     }
@@ -385,8 +442,23 @@ public class WheelView extends View {
         //若修正未完成，不算选中
         if (scrollY % itemHeight == 0) {
             int halfShowSize = showSize / 2;
-            selectedItemPosition = halfShowSize - (int) scrollY / itemHeight;
+            if (scrollY >= 0) {
+                //向下滑
+                int scrollItemCount = (int) (scrollY / itemHeight);
+                if (scrollItemCount > halfShowSize) {
+                    //下滑条目数量大于显示数量的一半
+                    int temp = (scrollItemCount - halfShowSize) % dataSize;
+                    selectedItemPosition = temp == 0 ? temp : dataSize - temp;
+                } else {
+                    //下滑条目数不足显示数量的一半
+                    selectedItemPosition = halfShowSize - scrollItemCount;
+                }
+            } else {
+                //向上滑
+                selectedItemPosition = (halfShowSize - (int) (scrollY / itemHeight)) % dataSize;
+            }
         }
+        isNeedUpdateSelectedItemPosition = false;
     }
 
     private void onSelectedChanged() {
@@ -399,6 +471,8 @@ public class WheelView extends View {
     }
 
     private void reset() {
+        selectedItemPosition = lastSelectedItemPosition = -1;
+        isNeedUpdateSelectedItemPosition = false;
         scrollY = 0;
         if (mScroller != null && !mScroller.isFinished()) {
             mScroller.abortAnimation();
