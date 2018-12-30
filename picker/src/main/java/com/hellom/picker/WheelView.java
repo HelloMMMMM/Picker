@@ -1,5 +1,6 @@
 package com.hellom.picker;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -7,9 +8,8 @@ import android.graphics.LinearGradient;
 import android.graphics.Paint;
 import android.graphics.Shader;
 import android.util.AttributeSet;
-import android.util.Log;
+import android.view.GestureDetector;
 import android.view.MotionEvent;
-import android.view.VelocityTracker;
 import android.view.View;
 import android.widget.OverScroller;
 
@@ -86,10 +86,6 @@ public class WheelView extends View {
      */
     private Shader shader;
     /**
-     * 上次操作的坐标以及按下时候的坐标
-     */
-    private float lastY;
-    /**
      * 滚动器
      */
     private OverScroller mScroller;
@@ -114,18 +110,11 @@ public class WheelView extends View {
      */
     private int dataSize = 0;
     /**
-     * 速度检测器
+     * 速率比率,默认0.3
      */
-    private VelocityTracker mVelocityTracker;
-    /**
-     * 滚动速率单位，用于fling动作时获取速率(单位时间滚动的像素)
-     */
-    private static final int VELOCITY_UNITS = 300;
-    /**
-     * 滚动速率最大最小值
-     */
-    private static final int MIN_VELOCITY = 1000;
-    private static final int MAX_VELOCITY = 6000;
+    private float velocityRate = 0.3f;
+    private static final float MAX_VELOCITY_RATE = 1.0f;
+    private static final float MIN_VELOCITY_RATE = 0.1f;
     /**
      * 手势模式
      */
@@ -133,6 +122,19 @@ public class WheelView extends View {
     private static final int MODE_NONE = 0;
     private static final int MODE_DRAG = 1;
     private static final int MODE_FLING = 2;
+    /**
+     * 手势检测器
+     */
+    private GestureDetector mGestureDetector;
+    /**
+     * 上一次选中的和此次选中item的position
+     */
+    private int lastSelectedItemPosition = -1;
+    private int selectedItemPosition = -1;
+    /**
+     * 选中item变化监听
+     */
+    private OnSelectedChangedListener mOnSelectedChangedListener;
 
     public WheelView(Context context) {
         this(context, null);
@@ -159,6 +161,71 @@ public class WheelView extends View {
         int evenNUmber2 = 2;
         if (showSize % evenNUmber2 == 0) {
             showSize += 1;
+        }
+        mGestureDetector = new GestureDetector(getContext(), new GestureDetector.OnGestureListener() {
+            @Override
+            public boolean onDown(MotionEvent e) {
+                //滚动未结束再次触碰，手动结束上次触碰
+                if (!mScroller.isFinished()) {
+                    mScroller.abortAnimation();
+                }
+                //按下时触发,false不传递无法触发scroll和fling
+                return true;
+            }
+
+            @Override
+            public void onShowPress(MotionEvent e) {
+            }
+
+            @Override
+            public boolean onSingleTapUp(MotionEvent e) {
+                //单击动作
+                performClick();
+                return false;
+            }
+
+            @Override
+            public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
+                //滑动模式(多次触发),返回值不影响手势检测器onTouchEvent的返回值
+                mode = MODE_DRAG;
+                scrollY += -distanceY;
+                return true;
+            }
+
+            @Override
+            public void onLongPress(MotionEvent e) {
+            }
+
+            @Override
+            public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+                //抛模式(手指抬起时且速度大于一定值触发),返回false时手势检测器onTouchEvent返回false
+                mode = MODE_FLING;
+                mScroller.fling(0, (int) scrollY, 0, (int) (velocityRate * velocityY), 0, 0, minScrollY, maxScrollY);
+                return false;
+            }
+        });
+    }
+
+    public String getSelectedItemData() {
+        return selectedItemPosition == -1 ? "" : data.get(selectedItemPosition);
+    }
+
+    public void setOnSelectedChangedListener(OnSelectedChangedListener mOnSelectedChangedListener) {
+        this.mOnSelectedChangedListener = mOnSelectedChangedListener;
+    }
+
+    /**
+     * 设置抛的速率比例，越大越快
+     *
+     * @param velocityRate 速率比例
+     */
+    public void setVelocityRate(float velocityRate) {
+        if (velocityRate > MAX_VELOCITY_RATE) {
+            this.velocityRate = MAX_VELOCITY_RATE;
+        } else if (velocityRate < MIN_VELOCITY_RATE) {
+            this.velocityRate = MIN_VELOCITY_RATE;
+        } else {
+            this.velocityRate = velocityRate;
         }
     }
 
@@ -194,24 +261,20 @@ public class WheelView extends View {
         if (isStart) {
             width = getWidth();
             height = getHeight();
-
             int temp1 = height - getPaddingTop() - getPaddingBottom();
             itemHeight = temp1 / showSize;
             centerItemTop = temp1 / 2 + getPaddingTop() - itemHeight / 2;
             centerItemBottom = temp1 / 2 + getPaddingTop() + itemHeight / 2;
-
             itemX = width / 2;
-
             int temp2 = (showSize + 1) / 2 * itemHeight;
             int realHeight = dataSize * itemHeight;
             minScrollY = temp2 - realHeight;
             maxScrollY = (showSize - 1) / 2 * itemHeight;
-
+            lastSelectedItemPosition = selectedItemPosition = dataSize == 0 ? -1 : showSize / 2;
             int[] colors = new int[]{0xFFFFFFFF, 0xAAFFFFFF, 0x00FFFFFF, 0x00FFFFFF, 0xAAFFFFFF, 0xFFFFFFFF};
             float[] positions = new float[]{0.0f, centerItemTop / height, centerItemTop / height, centerItemBottom / height, centerItemBottom / height, 1.0f};
             shader = new LinearGradient(0, 0, 0, height, colors, positions, Shader.TileMode.REPEAT);
             coverPaint.setShader(shader);
-
             isStart = false;
         }
     }
@@ -220,10 +283,13 @@ public class WheelView extends View {
     public void computeScroll() {
         if (mScroller.computeScrollOffset()) {
             scrollY = mScroller.getCurrY();
+            computeSelectedItemPosition();
         } else {
-            if (scrollY >= minScrollY && scrollY <= maxScrollY && mode == MODE_FLING) {
+            //抛模式结束后的修正
+            if (mode == MODE_FLING) {
                 correctScrollY();
             }
+            onSelectedChanged();
         }
         invalidate();
         super.computeScroll();
@@ -234,9 +300,8 @@ public class WheelView extends View {
         super.onDraw(canvas);
         measureData();
         canvas.drawColor(Color.WHITE);
-        //设置绘制数据画笔
+        //绘制数据
         paint.setColor(textColor);
-        //绘制一级数据
         if (dataSize > 0) {
             int startItemPos = (int) -scrollY / itemHeight;
             int halfShowSize = showSize / 2;
@@ -266,37 +331,15 @@ public class WheelView extends View {
         return super.performClick();
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        if (mVelocityTracker == null) {
-            mVelocityTracker = VelocityTracker.obtain();
-        }
-        mVelocityTracker.addMovement(event);
-        switch (event.getAction()) {
-            case MotionEvent.ACTION_DOWN:
-                lastY = event.getRawY();
-                break;
-            case MotionEvent.ACTION_MOVE:
-                float y = event.getRawY();
-                float dy = y - lastY;
-                updateScrollY(dy);
-                lastY = y;
-                break;
-            case MotionEvent.ACTION_UP:
-                performClick();
-                checkStateAndPosition();
-                break;
-            default:
-                break;
+        //手势检测器传递了事件且是手指抬起动作，进行位置修正，针对滑动情况
+        boolean detectedUp = event.getAction() == MotionEvent.ACTION_UP;
+        if (!mGestureDetector.onTouchEvent(event) && detectedUp) {
+            checkStateAndPosition();
         }
         return true;
-    }
-
-    @Override
-    protected void onScrollChanged(int l, int t, int oldl, int oldt) {
-        super.onScrollChanged(l, t, oldl, oldt);
-        int position = (int) Math.abs(scrollY / itemHeight);
-        Log.e("mx", "position:" + position);
     }
 
     private void checkStateAndPosition() {
@@ -308,18 +351,10 @@ public class WheelView extends View {
                 //下拉超出
                 mScroller.startScroll(0, (int) scrollY, 0, maxScrollY - (int) scrollY, 400);
             } else {
-                //正常范围内，判断拖拽和抛出的手势，分开处理
-                mVelocityTracker.computeCurrentVelocity(VELOCITY_UNITS, MAX_VELOCITY);
-                int speed = (int) mVelocityTracker.getYVelocity();
-                if (Math.abs(speed) < MIN_VELOCITY) {
-                    mode = MODE_DRAG;
+                //滑动情况下的位置修正
+                if (mode == MODE_DRAG) {
                     correctScrollY();
-                } else {
-                    mode = MODE_FLING;
-                    mScroller.fling(0, (int) scrollY, 0, speed, 0, 0, minScrollY, maxScrollY);
                 }
-                mVelocityTracker.recycle();
-                mVelocityTracker = null;
             }
         }
     }
@@ -341,13 +376,26 @@ public class WheelView extends View {
         mode = MODE_NONE;
     }
 
-    private void updateScrollY(float dy) {
-        scrollY += dy;
-    }
-
     private float getBaseLine(Paint paint, float top, float height) {
         Paint.FontMetricsInt fontMetrics = paint.getFontMetricsInt();
         return (2 * top + height - fontMetrics.bottom - fontMetrics.top) / 2;
+    }
+
+    private void computeSelectedItemPosition() {
+        //若修正未完成，不算选中
+        if (scrollY % itemHeight == 0) {
+            int halfShowSize = showSize / 2;
+            selectedItemPosition = halfShowSize - (int) scrollY / itemHeight;
+        }
+    }
+
+    private void onSelectedChanged() {
+        if (selectedItemPosition != lastSelectedItemPosition) {
+            if (mOnSelectedChangedListener != null) {
+                mOnSelectedChangedListener.onSelectedChanged();
+            }
+            lastSelectedItemPosition = selectedItemPosition;
+        }
     }
 
     private void reset() {
@@ -355,17 +403,14 @@ public class WheelView extends View {
         if (mScroller != null && !mScroller.isFinished()) {
             mScroller.abortAnimation();
         }
-        if (data != null) {
-            data.clear();
-            data = null;
-        }
+        data = null;
         dataSize = 0;
     }
 
-    /**
-     * 滚动监听接口
-     */
-    public interface OnScrollChanged {
-
+    public interface OnSelectedChangedListener {
+        /**
+         * 选中条目变化监听
+         */
+        void onSelectedChanged();
     }
 }
