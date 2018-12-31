@@ -8,6 +8,7 @@ import android.graphics.LinearGradient;
 import android.graphics.Paint;
 import android.graphics.Shader;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
@@ -25,27 +26,6 @@ public class WheelView extends View {
      */
     private float scrollY = 0;
     /**
-     * 显示的item个数，默认为5
-     */
-    private int showSize = 5;
-    /**
-     * 文字大小，默认16sp
-     */
-    private float textSize = 16;
-    /**
-     * 是否可以循环滚动
-     */
-    private boolean isCircle = false;
-    /**
-     * 文字颜色
-     */
-    private int textColor = 0xFF333333;
-    /**
-     * 线条的颜色
-     */
-    private int lineColor = 0xFFd1d1d1;
-
-    /**
      * view总宽度
      */
     private int width;
@@ -61,10 +41,6 @@ public class WheelView extends View {
      * item的X位置(文字)
      */
     private int itemX;
-    /**
-     * 选中item文字位置偏移
-     */
-    private int offsetX;
     /**
      * 可滚动的最小Y值,用于判断上拉超出
      */
@@ -107,19 +83,9 @@ public class WheelView extends View {
      */
     private float density;
     /**
-     * 数据
-     */
-    private List<String> data;
-    /**
      * 数据数量
      */
     private int dataSize = 0;
-    /**
-     * 速率比率,默认0.3
-     */
-    private float velocityRate = 0.3f;
-    private static final float MAX_VELOCITY_RATE = 1.0f;
-    private static final float MIN_VELOCITY_RATE = 0.1f;
     /**
      * 手势模式
      */
@@ -140,6 +106,49 @@ public class WheelView extends View {
      * 是否需要更新选中item位置
      */
     private boolean isNeedUpdateSelectedItemPosition = false;
+
+
+    /**
+     * 显示的item个数，默认为5
+     */
+    private int showSize = 5;
+    /**
+     * 文字大小，默认16sp
+     */
+    private float textSize = 16;
+    /**
+     * 是否可以循环滚动
+     */
+    private boolean isCircle = false;
+    /**
+     * 文字颜色
+     */
+    private int textColor = 0xFF333333;
+    /**
+     * 线条的颜色
+     */
+    private int lineColor = 0xFFd1d1d1;
+    /**
+     * 选中item文字位置偏移
+     */
+    private int mOffsetX;
+    /**
+     * 文字对齐方式,默认为居中
+     */
+    private int alignMode = CENTER_ALIGN_MODE;
+    public static final int CENTER_ALIGN_MODE = 1;
+    public static final int LEFT_ALIGN_MODE = 2;
+    public static final int RIGHT_ALIGN_MODE = 3;
+    /**
+     * 数据
+     */
+    private List<String> data;
+    /**
+     * 速率比率,默认0.3
+     */
+    private float velocityRate = 0.3f;
+    private static final float MAX_VELOCITY_RATE = 1.0f;
+    private static final float MIN_VELOCITY_RATE = 0.1f;
     /**
      * 选中item变化监听
      */
@@ -221,7 +230,7 @@ public class WheelView extends View {
      * 设置选中item文字位置偏移,负数为向左偏移,正数为向右偏移
      */
     public void setOffsetX(int offsetX) {
-        this.offsetX = offsetX;
+        this.mOffsetX = offsetX;
         notifyDataSetChanged();
     }
 
@@ -248,6 +257,17 @@ public class WheelView extends View {
         this.textSize = textSize;
         paint.setTextSize(scaleDensity * textSize);
         invalidate();
+    }
+
+    /**
+     * 设置对齐方式
+     */
+    public void setAlignMode(int alignMode) {
+        if (alignMode >= CENTER_ALIGN_MODE && alignMode <= RIGHT_ALIGN_MODE) {
+            this.alignMode = alignMode;
+            setPaintAlign(alignMode);
+            invalidate();
+        }
     }
 
     /**
@@ -296,7 +316,7 @@ public class WheelView extends View {
         paint = new Paint();
         paint.setAntiAlias(true);
         paint.setTextSize(scaleDensity * textSize);
-        paint.setTextAlign(Paint.Align.CENTER);
+        setPaintAlign(alignMode);
         coverPaint = new Paint();
         int evenNUmber2 = 2;
         if (showSize % evenNUmber2 == 0) {
@@ -347,6 +367,22 @@ public class WheelView extends View {
         });
     }
 
+    private void setPaintAlign(int alignMode) {
+        switch (alignMode) {
+            case CENTER_ALIGN_MODE:
+                paint.setTextAlign(Paint.Align.CENTER);
+                break;
+            case LEFT_ALIGN_MODE:
+                paint.setTextAlign(Paint.Align.LEFT);
+                break;
+            case RIGHT_ALIGN_MODE:
+                paint.setTextAlign(Paint.Align.RIGHT);
+                break;
+            default:
+                throw new IllegalArgumentException("unknown argument:" + alignMode);
+        }
+    }
+
     private void measureData() {
         if (isStart) {
             width = getWidth();
@@ -357,10 +393,10 @@ public class WheelView extends View {
             centerItemBottom = temp1 / 2 + getPaddingTop() + itemHeight / 2;
             //文字绘制x位置以及选中item的偏移
             int halfWidth = width / 2;
-            if (offsetX < -halfWidth) {
-                offsetX = -halfWidth;
-            } else if (offsetX > halfWidth) {
-                offsetX = halfWidth;
+            if (mOffsetX < -halfWidth) {
+                mOffsetX = -halfWidth;
+            } else if (mOffsetX > halfWidth) {
+                mOffsetX = halfWidth;
             }
             itemX = width / 2;
             //滚动范围设置
@@ -425,18 +461,20 @@ public class WheelView extends View {
             int halfShowSize = showSize / 2;
             for (int i = startItemPos, j = 0; i < startItemPos + showSize + halfShowSize; j++, i++) {
                 float topY = j * itemHeight + scrollY % itemHeight;
-                if (i >= 0 && i < dataSize) {
-                   /* if (selectedItemPosition == i) {
-                        canvas.drawText(data.get(i), itemX + offsetX, getBaseLine(paint, topY, itemHeight), paint);
-                    } else {*/
-                    // TODO: 2018/12/31/031 偏移 
-                    canvas.drawText(data.get(i), itemX, getBaseLine(paint, topY, itemHeight), paint);
-                    //}
-                } else {
-                    if (isCircle) {
-                        int pos = i % dataSize;
-                        canvas.drawText(data.get(pos < 0 ? pos + dataSize : pos), itemX, getBaseLine(paint, topY, itemHeight), paint);
+                float baseLineY = getBaseLine(paint, topY, itemHeight);
+                //在设置了偏移时,在可偏移区域计算偏移量
+                int offsetX = 0;
+                if (mOffsetX != 0) {
+                    int centerItemCenter = (int) (centerItemTop + itemHeight / 2);
+                    if (baseLineY > (centerItemTop - itemHeight / 2) && baseLineY < (centerItemBottom + itemHeight / 2)) {
+                        offsetX = (int) ((1 - Math.abs(baseLineY - centerItemCenter) / itemHeight) * mOffsetX);
                     }
+                }
+                if (i >= 0 && i < dataSize) {
+                    canvas.drawText(data.get(i), itemX + offsetX, baseLineY, paint);
+                } else if (isCircle) {
+                    int pos = i % dataSize;
+                    canvas.drawText(data.get(pos < 0 ? pos + dataSize : pos), itemX + offsetX, baseLineY, paint);
                 }
             }
         }

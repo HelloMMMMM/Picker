@@ -24,13 +24,14 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
         final WheelView picker = findViewById(R.id.wheel);
         List<String> one = new ArrayList<>();
-        for (int i = 0; i < 3; i++) {
+        for (int i = 0; i < 30; i++) {
             one.add(String.valueOf(i));
         }
         picker.setData(one);
         picker.setCircle(true);
-        picker.setSelectedItemPosition(50);
-        picker.setOffsetX(-30);
+        picker.setOffsetX(-80);
+        picker.setAlignMode(WheelView.RIGHT_ALIGN_MODE);
+
 
         findViewById(R.id.btn_1).setOnClickListener(this);
         findViewById(R.id.btn_2).setOnClickListener(this);
