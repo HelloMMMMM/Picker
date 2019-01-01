@@ -1,4 +1,4 @@
-package com.hellom.picker;
+package com.hellom.picker.datepicker;
 
 import android.app.Dialog;
 import android.graphics.Color;
@@ -7,13 +7,15 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
+
+import com.hellom.picker.R;
+import com.hellom.picker.baseview.WheelView;
 
 import java.util.ArrayList;
 import java.util.Calendar;

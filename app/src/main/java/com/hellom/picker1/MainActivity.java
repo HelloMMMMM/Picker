@@ -8,9 +8,10 @@ import android.view.View.OnClickListener;
 import android.widget.Toast;
 
 
-import com.hellom.picker.DatePicker;
+import com.hellom.picker.addresspicker.AddressPicker;
+import com.hellom.picker.datepicker.DatePicker;
 import com.hellom.picker.R;
-import com.hellom.picker.WheelView;
+import com.hellom.picker.baseview.WheelView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,11 +29,6 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             one.add(String.valueOf(i));
         }
         picker.setData(one);
-        picker.setCircle(true);
-        picker.setOffsetX(-80);
-        picker.setAlignMode(WheelView.RIGHT_ALIGN_MODE);
-
-
         findViewById(R.id.btn_1).setOnClickListener(this);
         findViewById(R.id.btn_2).setOnClickListener(this);
     }
@@ -44,6 +40,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                 showDatePicker();
                 break;
             case R.id.btn_2:
+                showAddressPicker();
                 break;
             default:
                 break;
@@ -64,6 +61,23 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                 });
             }
             datePicker.show(fragmentManager, "datePicker");
+        }
+    }
+
+    private void showAddressPicker() {
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        if (fragmentManager != null) {
+            AddressPicker addressPicker = (AddressPicker) fragmentManager.findFragmentByTag("addressPicker");
+            if (addressPicker == null) {
+                addressPicker = AddressPicker.newInstance();
+                addressPicker.setOnAddressSelectedListener(new AddressPicker.OnAddressSelectedListener() {
+                    @Override
+                    public void onAddressSelected(String year, String month, String day) {
+                        Toast.makeText(MainActivity.this, year + "-" + month + "-" + day, Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
+            addressPicker.show(fragmentManager, "addressPicker");
         }
     }
 }

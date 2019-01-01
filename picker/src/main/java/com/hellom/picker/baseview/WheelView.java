@@ -1,7 +1,8 @@
-package com.hellom.picker;
+package com.hellom.picker.baseview;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.LinearGradient;
@@ -13,6 +14,8 @@ import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.OverScroller;
+
+import com.hellom.picker.R;
 
 import java.util.List;
 
@@ -107,27 +110,26 @@ public class WheelView extends View {
      */
     private boolean isNeedUpdateSelectedItemPosition = false;
 
-
     /**
      * 显示的item个数，默认为5
      */
-    private int showSize = 5;
+    private int showSize;
     /**
      * 文字大小，默认16sp
      */
-    private float textSize = 16;
+    private float textSize;
     /**
      * 是否可以循环滚动
      */
-    private boolean isCircle = false;
+    private boolean isCircle;
     /**
      * 文字颜色
      */
-    private int textColor = 0xFF333333;
+    private int textColor;
     /**
      * 线条的颜色
      */
-    private int lineColor = 0xFFd1d1d1;
+    private int lineColor;
     /**
      * 选中item文字位置偏移
      */
@@ -146,7 +148,7 @@ public class WheelView extends View {
     /**
      * 速率比率,默认0.3
      */
-    private float velocityRate = 0.3f;
+    private float velocityRate;
     private static final float MAX_VELOCITY_RATE = 1.0f;
     private static final float MIN_VELOCITY_RATE = 0.1f;
     /**
@@ -227,10 +229,10 @@ public class WheelView extends View {
     }
 
     /**
-     * 设置选中item文字位置偏移,负数为向左偏移,正数为向右偏移
+     * 设置选中item文字位置偏移,负数为向左偏移,正数为向右偏移(单位dp)
      */
     public void setOffsetX(int offsetX) {
-        this.mOffsetX = offsetX;
+        this.mOffsetX = (int) (offsetX * density);
         notifyDataSetChanged();
     }
 
@@ -251,11 +253,11 @@ public class WheelView extends View {
     }
 
     /**
-     * 设置文字大小
+     * 设置文字大小(单位sp)
      */
     public void setTextSize(float textSize) {
-        this.textSize = textSize;
-        paint.setTextSize(scaleDensity * textSize);
+        this.textSize = scaleDensity * textSize;
+        paint.setTextSize(this.textSize);
         invalidate();
     }
 
@@ -306,16 +308,30 @@ public class WheelView extends View {
 
     public WheelView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
+        initStyle(context, attrs);
         init();
     }
 
-    private void init() {
+    private void initStyle(Context context, AttributeSet attrs) {
         scaleDensity = getResources().getDisplayMetrics().scaledDensity;
         density = getResources().getDisplayMetrics().density;
+        TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.WheelView);
+        textSize = typedArray.getDimension(R.styleable.WheelView_wl_textSize, 16 * scaleDensity);
+        textColor = typedArray.getColor(R.styleable.WheelView_wl_textColor, 0xFF333333);
+        lineColor = typedArray.getColor(R.styleable.WheelView_wl_lineColor, 0xFFd1d1d1);
+        isCircle = typedArray.getBoolean(R.styleable.WheelView_wl_isCircle, false);
+        showSize = typedArray.getInteger(R.styleable.WheelView_wl_showSize, 5);
+        mOffsetX = (int) typedArray.getDimension(R.styleable.WheelView_wl_offsetX, 0);
+        alignMode = typedArray.getInt(R.styleable.WheelView_wl_alignMode, CENTER_ALIGN_MODE);
+        velocityRate = typedArray.getFloat(R.styleable.WheelView_wl_velocityRate, 0.3f);
+        typedArray.recycle();
+    }
+
+    private void init() {
         mScroller = new OverScroller(getContext());
         paint = new Paint();
         paint.setAntiAlias(true);
-        paint.setTextSize(scaleDensity * textSize);
+        paint.setTextSize(textSize);
         setPaintAlign(alignMode);
         coverPaint = new Paint();
         int evenNUmber2 = 2;
