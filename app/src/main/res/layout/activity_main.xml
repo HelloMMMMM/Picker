@@ -27,9 +27,9 @@
             android:id="@+id/wheel"
             android:layout_width="match_parent"
             android:layout_height="250dp"
-            app:wl_isCircle="true"
             app:wl_lineColor="@color/C3"
             app:wl_offsetX="-16dp"
+            app:wl_isCircle="true"
             app:wl_textColor="@color/C3" />
     </LinearLayout>
 </ScrollView>

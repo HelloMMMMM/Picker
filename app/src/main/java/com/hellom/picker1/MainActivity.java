@@ -1,6 +1,8 @@
 package com.hellom.picker1;
 
+import android.graphics.Color;
 import android.support.v4.app.FragmentManager;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -25,7 +27,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
         final WheelView picker = findViewById(R.id.wheel);
         List<String> one = new ArrayList<>();
-        for (int i = 0; i < 30; i++) {
+        for (int i = 0; i < 3; i++) {
             one.add(String.valueOf(i));
         }
         picker.setData(one);
@@ -52,7 +54,9 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         if (fragmentManager != null) {
             DatePicker datePicker = (DatePicker) fragmentManager.findFragmentByTag("datePicker");
             if (datePicker == null) {
-                datePicker = DatePicker.newInstance();
+                datePicker = new DatePicker.Builder()
+                        .setLineColor(Color.BLACK).setTextSize(18).setTextColor(Color.GREEN).setOffsetX(16)
+                        .setCurrentDate(1111, 11, 11).build();
                 datePicker.setOnDateSelectedListener(new DatePicker.OnDateSelectedListener() {
                     @Override
                     public void onDateSelected(String year, String month, String day) {

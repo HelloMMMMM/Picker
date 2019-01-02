@@ -15,6 +15,8 @@ import android.view.Window;
 import android.view.WindowManager;
 
 import com.hellom.picker.R;
+import com.hellom.picker.addresspicker.bean.City;
+import com.hellom.picker.addresspicker.bean.County;
 import com.hellom.picker.addresspicker.bean.Province;
 import com.hellom.picker.addresspicker.db.manager.AddressDictManager;
 import com.hellom.picker.baseview.WheelView;
@@ -133,14 +135,9 @@ public class AddressPicker extends DialogFragment implements View.OnClickListene
     }
 
     private void initData() {
-        List<String> data = new ArrayList<>();
-        List<Province> provinces = mAddressDictManager.getProvinceList();
-        for (int i = 0; i < provinces.size(); i++) {
-            data.add(provinces.get(i).name);
-        }
-        provinceList.setData(data);
-        //cityList.setData(initMonthData());
-        //areaList.setData(initDayData(currentYear, currentMonth));
+        provinceList.setData(initProvinceData());
+        cityList.setData(initCityData(currentProvince));
+        areaList.setData(initCountryData(currentCity));
     }
 
     @Override
@@ -154,6 +151,35 @@ public class AddressPicker extends DialogFragment implements View.OnClickListene
             }
             dismiss();
         }
+    }
+
+    private List<String> initProvinceData() {
+        List<String> data = new ArrayList<>();
+        List<Province> provinces = mAddressDictManager.getProvinceList();
+        currentProvince = provinces.get(0).id;
+        for (int i = 0; i < provinces.size(); i++) {
+            data.add(provinces.get(i).name);
+        }
+        return data;
+    }
+
+    private List<String> initCityData(int provinceId) {
+        List<String> data = new ArrayList<>();
+        List<City> cities = mAddressDictManager.getCityList(provinceId);
+        currentCity = cities.get(0).id;
+        for (int i = 0; i < cities.size(); i++) {
+            data.add(cities.get(i).name);
+        }
+        return data;
+    }
+
+    private List<String> initCountryData(int cityId) {
+        List<String> data = new ArrayList<>();
+        List<County> counties = mAddressDictManager.getCountyList(cityId);
+        for (int i = 0; i < counties.size(); i++) {
+            data.add(counties.get(i).name);
+        }
+        return data;
     }
 
     public interface OnAddressSelectedListener {

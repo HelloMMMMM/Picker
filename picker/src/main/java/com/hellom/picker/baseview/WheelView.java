@@ -164,6 +164,13 @@ public class WheelView extends View {
     }
 
     /**
+     * 获取选中item下标
+     */
+    public int getSelectedItemPosition() {
+        return selectedItemPosition;
+    }
+
+    /**
      * 设置选中item监听
      */
     public void setOnSelectedChangedListener(OnSelectedChangedListener mOnSelectedChangedListener) {
@@ -425,12 +432,14 @@ public class WheelView extends View {
                 minScrollY = temp2 - realHeight;
                 maxScrollY = (showSize - 1) / 2 * itemHeight;
             }
-            //设置选中position
             int halfShowSize = showSize / 2;
+            //初始化scrollY
+            scrollY = halfShowSize * itemHeight;
+            //设置选中position
             if (dataSize == 0) {
                 lastSelectedItemPosition = selectedItemPosition = -1;
             } else if (selectedItemPosition == -1) {
-                lastSelectedItemPosition = selectedItemPosition = halfShowSize;
+                lastSelectedItemPosition = selectedItemPosition = 0;
             } else {
                 lastSelectedItemPosition = selectedItemPosition;
                 scrollY = (halfShowSize - selectedItemPosition) * itemHeight;
