@@ -485,9 +485,27 @@ public class WheelView extends View {
             int startItemPos = (int) -scrollY / itemHeight;
             int halfShowSize = showSize / 2;
             for (int i = startItemPos, j = 0; i < startItemPos + showSize + halfShowSize; j++, i++) {
+                //获取绘制内容
+                String drawString = null;
+                if (i >= 0 && i < dataSize) {
+                    drawString = data.get(i);
+                } else if (isCircle) {
+                    int pos = i % dataSize;
+                    drawString = data.get(pos < 0 ? pos + dataSize : pos);
+                }
+                if (drawString == null) {
+                    continue;
+                }
+                //测量文字长度，若太长，缩小文字大小
+                float textWidth = paint.measureText(drawString);
+                if (textWidth > width) {
+                    paint.setTextSize(textSize * width / textWidth);
+                } else {
+                    paint.setTextSize(textSize);
+                }
+                //在设置了偏移时,在可偏移区域计算偏移量
                 float topY = j * itemHeight + scrollY % itemHeight;
                 float baseLineY = getBaseLine(paint, topY, itemHeight);
-                //在设置了偏移时,在可偏移区域计算偏移量
                 int offsetX = 0;
                 if (mOffsetX != 0) {
                     int centerItemCenter = (int) (centerItemTop + itemHeight / 2);
@@ -495,12 +513,7 @@ public class WheelView extends View {
                         offsetX = (int) ((1 - Math.abs(baseLineY - centerItemCenter) / itemHeight) * mOffsetX);
                     }
                 }
-                if (i >= 0 && i < dataSize) {
-                    canvas.drawText(data.get(i), itemX + offsetX, baseLineY, paint);
-                } else if (isCircle) {
-                    int pos = i % dataSize;
-                    canvas.drawText(data.get(pos < 0 ? pos + dataSize : pos), itemX + offsetX, baseLineY, paint);
-                }
+                canvas.drawText(drawString, itemX + offsetX, baseLineY, paint);
             }
         }
         //绘制中间的线条和遮罩层

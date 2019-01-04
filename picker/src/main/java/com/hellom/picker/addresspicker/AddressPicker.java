@@ -32,6 +32,9 @@ public class AddressPicker extends DialogFragment implements View.OnClickListene
 
     private WheelView provinceList, cityList, areaList;
     private int currentProvince, currentCity, currentArea;
+    private List<Province> provinceData;
+    private List<City> cityData;
+    private List<County> countryData;
     private AddressDictManager mAddressDictManager;
 
     private AddressPicker.OnAddressSelectedListener mOnAddressSelectedListener;
@@ -104,8 +107,10 @@ public class AddressPicker extends DialogFragment implements View.OnClickListene
             @Override
             public void onSelectedChanged() {
                 try {
-                    //currentYear = Integer.parseInt(yearList.getSelectedItemData());
-                    //dayList.setData(initDayData(currentYear, currentMonth));
+                    Province province = provinceData.get(provinceList.getSelectedItemPosition());
+                    currentProvince = province.id;
+                    cityList.setData(initCityData(province.id));
+                    areaList.setData(initCountryData(currentCity));
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -115,8 +120,9 @@ public class AddressPicker extends DialogFragment implements View.OnClickListene
             @Override
             public void onSelectedChanged() {
                 try {
-                    //currentMonth = Integer.parseInt(monthList.getSelectedItemData());
-                    //dayList.setData(initDayData(currentYear, currentMonth));
+                    City city = cityData.get(cityList.getSelectedItemPosition());
+                    currentCity = city.id;
+                    areaList.setData(initCountryData(city.id));
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -126,7 +132,8 @@ public class AddressPicker extends DialogFragment implements View.OnClickListene
             @Override
             public void onSelectedChanged() {
                 try {
-                    //currentDay = Integer.parseInt(dayList.getSelectedItemData());
+                    County county = countryData.get(areaList.getSelectedItemPosition());
+                    currentArea = county.id;
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -155,29 +162,42 @@ public class AddressPicker extends DialogFragment implements View.OnClickListene
 
     private List<String> initProvinceData() {
         List<String> data = new ArrayList<>();
-        List<Province> provinces = mAddressDictManager.getProvinceList();
-        currentProvince = provinces.get(0).id;
-        for (int i = 0; i < provinces.size(); i++) {
-            data.add(provinces.get(i).name);
+        provinceData = mAddressDictManager.getProvinceList();
+        if (provinceData != null) {
+            if (provinceData.size() > 0) {
+                currentProvince = provinceData.get(0).id;
+            }
+            for (int i = 0; i < provinceData.size(); i++) {
+                data.add(provinceData.get(i).name);
+            }
         }
         return data;
     }
 
     private List<String> initCityData(int provinceId) {
         List<String> data = new ArrayList<>();
-        List<City> cities = mAddressDictManager.getCityList(provinceId);
-        currentCity = cities.get(0).id;
-        for (int i = 0; i < cities.size(); i++) {
-            data.add(cities.get(i).name);
+        cityData = mAddressDictManager.getCityList(provinceId);
+        if (cityData != null) {
+            if (cityData.size() > 0) {
+                currentCity = cityData.get(0).id;
+            }
+            for (int i = 0; i < cityData.size(); i++) {
+                data.add(cityData.get(i).name);
+            }
         }
         return data;
     }
 
     private List<String> initCountryData(int cityId) {
         List<String> data = new ArrayList<>();
-        List<County> counties = mAddressDictManager.getCountyList(cityId);
-        for (int i = 0; i < counties.size(); i++) {
-            data.add(counties.get(i).name);
+        countryData = mAddressDictManager.getCountyList(cityId);
+        if (countryData != null) {
+            if (countryData.size() > 0) {
+                currentArea = countryData.get(0).id;
+            }
+            for (int i = 0; i < countryData.size(); i++) {
+                data.add(countryData.get(i).name);
+            }
         }
         return data;
     }
