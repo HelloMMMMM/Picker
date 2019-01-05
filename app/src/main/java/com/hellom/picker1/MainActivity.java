@@ -74,6 +74,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             if (addressPicker == null) {
                 addressPicker = AddressPicker.builder().setOffsetX(-16).setLineColor(Color.GREEN)
                         .setTextColor(Color.GREEN).setShowMode(AddressPicker.BOTTOM_STYLE).setTextSize(18)
+                        .setAddress("湖北", "襄阳市", "枣阳市")
                         .setOnAddressSelectedListener(new AddressPicker.OnAddressSelectedListener() {
                             @Override
                             public void onAddressSelected(String year, String month, String day) {

@@ -31,8 +31,8 @@ import java.util.List;
  */
 public class AddressPicker extends DialogFragment implements View.OnClickListener {
 
-    private WheelView provinceList, cityList, areaList;
-    private int currentProvince, currentCity, currentCounty;
+    private WheelView provinceList, cityList, countyList;
+    private int currentProvince = -1, currentCity = -1, currentCounty = -1;
     private List<Province> provinceData;
     private List<City> cityData;
     private List<County> countyData;
@@ -111,19 +111,19 @@ public class AddressPicker extends DialogFragment implements View.OnClickListene
     private void initView(View view) {
         provinceList = view.findViewById(R.id.province_picker);
         cityList = view.findViewById(R.id.city_picker);
-        areaList = view.findViewById(R.id.area_picker);
+        countyList = view.findViewById(R.id.area_picker);
         provinceList.setTextColor(params.textColor);
         cityList.setTextColor(params.textColor);
-        areaList.setTextColor(params.textColor);
+        countyList.setTextColor(params.textColor);
         provinceList.setTextSize(params.textSize);
         cityList.setTextSize(params.textSize);
-        areaList.setTextSize(params.textSize);
+        countyList.setTextSize(params.textSize);
         provinceList.setLineColor(params.lineColor);
         cityList.setLineColor(params.lineColor);
-        areaList.setLineColor(params.lineColor);
+        countyList.setLineColor(params.lineColor);
         provinceList.setOffsetX(params.mOffsetX);
         cityList.setOffsetX(params.mOffsetX);
-        areaList.setOffsetX(params.mOffsetX);
+        countyList.setOffsetX(params.mOffsetX);
     }
 
     private void initListener(View view) {
@@ -136,7 +136,7 @@ public class AddressPicker extends DialogFragment implements View.OnClickListene
                     Province province = provinceData.get(provinceList.getSelectedItemPosition());
                     currentProvince = province.id;
                     cityList.setData(initCityData(province.id));
-                    areaList.setData(initCountryData(currentCity));
+                    countyList.setData(initCountryData(currentCity));
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -148,17 +148,17 @@ public class AddressPicker extends DialogFragment implements View.OnClickListene
                 try {
                     City city = cityData.get(cityList.getSelectedItemPosition());
                     currentCity = city.id;
-                    areaList.setData(initCountryData(city.id));
+                    countyList.setData(initCountryData(city.id));
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
         });
-        areaList.setOnSelectedChangedListener(new WheelView.OnSelectedChangedListener() {
+        countyList.setOnSelectedChangedListener(new WheelView.OnSelectedChangedListener() {
             @Override
             public void onSelectedChanged() {
                 try {
-                    County county = countyData.get(areaList.getSelectedItemPosition());
+                    County county = countyData.get(countyList.getSelectedItemPosition());
                     currentCounty = county.id;
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -170,8 +170,11 @@ public class AddressPicker extends DialogFragment implements View.OnClickListene
     private void initData() {
         mAddressDictManager = new AddressDictManager(getActivity());
         provinceList.setData(initProvinceData());
+        setCurrentProvince(params.currentProvince);
         cityList.setData(initCityData(currentProvince));
-        areaList.setData(initCountryData(currentCity));
+        setCurrentCity(params.currentCity);
+        countyList.setData(initCountryData(currentCity));
+        setCurrentCounty(params.currentCounty);
     }
 
     @Override
@@ -181,7 +184,7 @@ public class AddressPicker extends DialogFragment implements View.OnClickListene
             dismiss();
         } else if (id == R.id.tv_sure) {
             if (params.mOnAddressSelectedListener != null) {
-                params.mOnAddressSelectedListener.onAddressSelected(provinceList.getSelectedItemData(), cityList.getSelectedItemData(), areaList.getSelectedItemData());
+                params.mOnAddressSelectedListener.onAddressSelected(provinceList.getSelectedItemData(), cityList.getSelectedItemData(), countyList.getSelectedItemData());
             }
             dismiss();
         }
@@ -227,6 +230,30 @@ public class AddressPicker extends DialogFragment implements View.OnClickListene
             }
         }
         return data;
+    }
+
+    private void setCurrentProvince(String province) {
+        Province provinceBean = mAddressDictManager.getProvinceBean(province);
+        if (provinceBean != null) {
+            currentProvince = provinceBean.id;
+            provinceList.setSelectedItem(province);
+        }
+    }
+
+    private void setCurrentCity(String city) {
+        City cityBean = mAddressDictManager.getCityBean(city);
+        if (cityBean != null) {
+            currentCity = cityBean.id;
+            cityList.setSelectedItem(city);
+        }
+    }
+
+    private void setCurrentCounty(String county) {
+        County countyBean = mAddressDictManager.getCountyBean(county);
+        if (countyBean != null) {
+            currentCounty = countyBean.id;
+            countyList.setSelectedItem(county);
+        }
     }
 
     public interface OnAddressSelectedListener {

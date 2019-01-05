@@ -19,6 +19,7 @@ import java.util.List;
 
 import static com.hellom.picker.addresspicker.db.TableField.ADDRESS_DICT_FIELD_CODE;
 import static com.hellom.picker.addresspicker.db.TableField.ADDRESS_DICT_FIELD_ID;
+import static com.hellom.picker.addresspicker.db.TableField.ADDRESS_DICT_FIELD_NAME;
 import static com.hellom.picker.addresspicker.db.TableField.ADDRESS_DICT_FIELD_PARENTID;
 
 public class AddressDictManager {
@@ -148,8 +149,8 @@ public class AddressDictManager {
     /**
      * 获取省份
      */
-    public String getProvince(String provinceCode) {
-        Cursor cursor = db.rawQuery("select * from " + TableField.TABLE_ADDRESS_DICT + " where " + ADDRESS_DICT_FIELD_CODE + "=?", new String[]{provinceCode});
+    public String getProvince(String provinceName) {
+        Cursor cursor = db.rawQuery("select * from " + TableField.TABLE_ADDRESS_DICT + " where " + ADDRESS_DICT_FIELD_NAME + "=?", new String[]{provinceName});
         if (cursor != null && cursor.moveToFirst()) {
             Province province = new Province();
             province.id = cursor.getInt(cursor.getColumnIndex(ADDRESS_DICT_FIELD_ID));
@@ -165,8 +166,11 @@ public class AddressDictManager {
     /**
      * 获取省份
      */
-    public Province getProvinceBean(String provinceCode) {
-        Cursor cursor = db.rawQuery("select * from " + TableField.TABLE_ADDRESS_DICT + " where " + ADDRESS_DICT_FIELD_CODE + "=?", new String[]{provinceCode});
+    public Province getProvinceBean(String provinceName) {
+        if (provinceName == null) {
+            return null;
+        }
+        Cursor cursor = db.rawQuery("select * from " + TableField.TABLE_ADDRESS_DICT + " where " + ADDRESS_DICT_FIELD_NAME + "=?", new String[]{provinceName});
         if (cursor != null && cursor.moveToFirst()) {
             Province province = new Province();
             province.id = cursor.getInt(cursor.getColumnIndex(ADDRESS_DICT_FIELD_ID));
@@ -200,8 +204,8 @@ public class AddressDictManager {
     /**
      * 获取城市
      */
-    public String getCity(String cityCode) {
-        Cursor cursor = db.rawQuery("select * from " + TableField.TABLE_ADDRESS_DICT + " where " + ADDRESS_DICT_FIELD_CODE + "=?", new String[]{cityCode});
+    public String getCity(String cityName) {
+        Cursor cursor = db.rawQuery("select * from " + TableField.TABLE_ADDRESS_DICT + " where " + ADDRESS_DICT_FIELD_NAME + "=?", new String[]{cityName});
         if (cursor != null && cursor.moveToFirst()) {
             City city = new City();
             city.id = cursor.getInt(cursor.getColumnIndex(ADDRESS_DICT_FIELD_ID));
@@ -217,8 +221,11 @@ public class AddressDictManager {
     /**
      * 获取城市
      */
-    public City getCityBean(String cityCode) {
-        Cursor cursor = db.rawQuery("select * from " + TableField.TABLE_ADDRESS_DICT + " where " + ADDRESS_DICT_FIELD_CODE + "=?", new String[]{cityCode});
+    public City getCityBean(String cityName) {
+        if (cityName == null) {
+            return null;
+        }
+        Cursor cursor = db.rawQuery("select * from " + TableField.TABLE_ADDRESS_DICT + " where " + ADDRESS_DICT_FIELD_NAME + "=?", new String[]{cityName});
         if (cursor != null && cursor.moveToFirst()) {
             City city = new City();
             city.id = cursor.getInt(cursor.getColumnIndex(ADDRESS_DICT_FIELD_ID));
@@ -249,8 +256,8 @@ public class AddressDictManager {
         return countyList;
     }
 
-    public String getCounty(String countyCode) {
-        Cursor cursor = db.rawQuery("select * from " + TableField.TABLE_ADDRESS_DICT + " where " + ADDRESS_DICT_FIELD_CODE + "=?", new String[]{countyCode});
+    public String getCounty(String countyName) {
+        Cursor cursor = db.rawQuery("select * from " + TableField.TABLE_ADDRESS_DICT + " where " + ADDRESS_DICT_FIELD_NAME + "=?", new String[]{countyName});
         if (cursor != null && cursor.moveToFirst()) {
             County county = new County();
             county.id = cursor.getInt(cursor.getColumnIndex(ADDRESS_DICT_FIELD_ID));
@@ -263,8 +270,11 @@ public class AddressDictManager {
         }
     }
 
-    public County getCountyBean(String countyCode) {
-        Cursor cursor = db.rawQuery("select * from " + TableField.TABLE_ADDRESS_DICT + " where " + ADDRESS_DICT_FIELD_CODE + "=?", new String[]{countyCode});
+    public County getCountyBean(String countyName) {
+        if (countyName == null) {
+            return null;
+        }
+        Cursor cursor = db.rawQuery("select * from " + TableField.TABLE_ADDRESS_DICT + " where " + ADDRESS_DICT_FIELD_NAME + "=?", new String[]{countyName});
         if (cursor != null && cursor.moveToFirst()) {
             County county = new County();
             county.id = cursor.getInt(cursor.getColumnIndex(ADDRESS_DICT_FIELD_ID));
