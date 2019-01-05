@@ -2,7 +2,6 @@ package com.hellom.picker1;
 
 import android.graphics.Color;
 import android.support.v4.app.FragmentManager;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -54,15 +53,15 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         if (fragmentManager != null) {
             DatePicker datePicker = (DatePicker) fragmentManager.findFragmentByTag("datePicker");
             if (datePicker == null) {
-                datePicker = new DatePicker.Builder()
-                        .setLineColor(Color.BLACK).setTextSize(18).setTextColor(Color.GREEN).setOffsetX(16)
-                        .setCurrentDate(1111, 11, 11).build();
-                datePicker.setOnDateSelectedListener(new DatePicker.OnDateSelectedListener() {
-                    @Override
-                    public void onDateSelected(String year, String month, String day) {
-                        Toast.makeText(MainActivity.this, year + "-" + month + "-" + day, Toast.LENGTH_SHORT).show();
-                    }
-                });
+                datePicker = DatePicker.builder()
+                        .setLineColor(Color.BLUE).setTextSize(18).setTextColor(Color.BLUE).setOffsetX(-16).setShowMode(DatePicker.BOTTOM_STYLE)
+                        .setCurrentDate(1111, 11, 11)
+                        .setOnDateSelectedListener(new DatePicker.OnDateSelectedListener() {
+                            @Override
+                            public void onDateSelected(String year, String month, String day) {
+                                Toast.makeText(MainActivity.this, year + "-" + month + "-" + day, Toast.LENGTH_SHORT).show();
+                            }
+                        }).build();
             }
             datePicker.show(fragmentManager, "datePicker");
         }
@@ -73,13 +72,14 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         if (fragmentManager != null) {
             AddressPicker addressPicker = (AddressPicker) fragmentManager.findFragmentByTag("addressPicker");
             if (addressPicker == null) {
-                addressPicker = AddressPicker.newInstance();
-                addressPicker.setOnAddressSelectedListener(new AddressPicker.OnAddressSelectedListener() {
-                    @Override
-                    public void onAddressSelected(String year, String month, String day) {
-                        Toast.makeText(MainActivity.this, year + "-" + month + "-" + day, Toast.LENGTH_SHORT).show();
-                    }
-                });
+                addressPicker = AddressPicker.builder().setOffsetX(-16).setLineColor(Color.GREEN)
+                        .setTextColor(Color.GREEN).setShowMode(AddressPicker.BOTTOM_STYLE).setTextSize(18)
+                        .setOnAddressSelectedListener(new AddressPicker.OnAddressSelectedListener() {
+                            @Override
+                            public void onAddressSelected(String year, String month, String day) {
+                                Toast.makeText(MainActivity.this, year + "-" + month + "-" + day, Toast.LENGTH_SHORT).show();
+                            }
+                        }).build();
             }
             addressPicker.show(fragmentManager, "addressPicker");
         }

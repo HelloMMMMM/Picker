@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
+import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -36,14 +37,19 @@ public class AddressPicker extends DialogFragment implements View.OnClickListene
     private List<City> cityData;
     private List<County> countryData;
     private AddressDictManager mAddressDictManager;
+    private static Params params;
+    /**
+     * 显示位置
+     */
+    public static final int BOTTOM_STYLE = 1;
+    public static final int CENTER_STYLE = 2;
 
-    private AddressPicker.OnAddressSelectedListener mOnAddressSelectedListener;
-
-    public void setOnAddressSelectedListener(OnAddressSelectedListener mOnAddressSelectedListener) {
-        this.mOnAddressSelectedListener = mOnAddressSelectedListener;
+    public static Builder builder() {
+        return new Builder();
     }
 
-    public static AddressPicker newInstance() {
+    private static AddressPicker newInstance(Params p) {
+        params = p;
         Bundle args = new Bundle();
         AddressPicker fragment = new AddressPicker();
         fragment.setArguments(args);
@@ -54,7 +60,6 @@ public class AddressPicker extends DialogFragment implements View.OnClickListene
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         initStyle();
-
         View view = inflater.inflate(R.layout.dialog_fragment_address_picker, container, false);
         initView(view);
         initListener(view);
@@ -65,7 +70,9 @@ public class AddressPicker extends DialogFragment implements View.OnClickListene
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setStyle(DialogFragment.STYLE_NO_TITLE, R.style.bottom_dialog_fragment);
+        if (params.showMode == BOTTOM_STYLE) {
+            setStyle(DialogFragment.STYLE_NO_TITLE, R.style.bottom_dialog_fragment);
+        }
     }
 
     @Override
@@ -79,25 +86,44 @@ public class AddressPicker extends DialogFragment implements View.OnClickListene
         dialog.setCanceledOnTouchOutside(true);
         Window window = getDialog().getWindow();
         if (window != null) {
-            window.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
             WindowManager.LayoutParams layoutParams = window.getAttributes();
-            layoutParams.gravity = Gravity.BOTTOM;
-
+            if (params.showMode == BOTTOM_STYLE) {
+                window.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                layoutParams.gravity = Gravity.BOTTOM;
+            } else if (params.showMode == CENTER_STYLE) {
+                layoutParams.gravity = Gravity.CENTER;
+            }
         }
     }
 
     private void initSize() {
         Window window = getDialog().getWindow();
         if (window != null) {
-            window.setLayout(-1, -2);
+            if (params.showMode == BOTTOM_STYLE) {
+                window.setLayout(-1, -2);
+            } else if (params.showMode == CENTER_STYLE) {
+                DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
+                window.setLayout((int) (displayMetrics.widthPixels * 0.9f), -2);
+            }
         }
     }
 
     private void initView(View view) {
-        mAddressDictManager = new AddressDictManager(getActivity());
         provinceList = view.findViewById(R.id.province_picker);
         cityList = view.findViewById(R.id.city_picker);
         areaList = view.findViewById(R.id.area_picker);
+        provinceList.setTextColor(params.textColor);
+        cityList.setTextColor(params.textColor);
+        areaList.setTextColor(params.textColor);
+        provinceList.setTextSize(params.textSize);
+        cityList.setTextSize(params.textSize);
+        areaList.setTextSize(params.textSize);
+        provinceList.setLineColor(params.lineColor);
+        cityList.setLineColor(params.lineColor);
+        areaList.setLineColor(params.lineColor);
+        provinceList.setOffsetX(params.mOffsetX);
+        cityList.setOffsetX(params.mOffsetX);
+        areaList.setOffsetX(params.mOffsetX);
     }
 
     private void initListener(View view) {
@@ -142,6 +168,7 @@ public class AddressPicker extends DialogFragment implements View.OnClickListene
     }
 
     private void initData() {
+        mAddressDictManager = new AddressDictManager(getActivity());
         provinceList.setData(initProvinceData());
         cityList.setData(initCityData(currentProvince));
         areaList.setData(initCountryData(currentCity));
@@ -153,8 +180,8 @@ public class AddressPicker extends DialogFragment implements View.OnClickListene
         if (id == R.id.tv_cancel) {
             dismiss();
         } else if (id == R.id.tv_sure) {
-            if (mOnAddressSelectedListener != null) {
-                mOnAddressSelectedListener.onAddressSelected(provinceList.getSelectedItemData(), cityList.getSelectedItemData(), areaList.getSelectedItemData());
+            if (params.mOnAddressSelectedListener != null) {
+                params.mOnAddressSelectedListener.onAddressSelected(provinceList.getSelectedItemData(), cityList.getSelectedItemData(), areaList.getSelectedItemData());
             }
             dismiss();
         }
@@ -211,5 +238,90 @@ public class AddressPicker extends DialogFragment implements View.OnClickListene
          * @param area     区
          */
         void onAddressSelected(String province, String city, String area);
+    }
+
+    /**
+     * 建造者
+     */
+    public static class Builder {
+        private Params p;
+
+        private Builder() {
+            p = new Params();
+        }
+
+        public Builder setShowMode(int mode) {
+            if (mode == CENTER_STYLE || mode == BOTTOM_STYLE) {
+                p.showMode = mode;
+            }
+            return this;
+        }
+
+        public Builder setOffsetX(int offsetX) {
+            p.mOffsetX = offsetX;
+            return this;
+        }
+
+        public Builder setTextSize(int size) {
+            p.textSize = size;
+            return this;
+        }
+
+        public Builder setTextColor(int color) {
+            p.textColor = color;
+            return this;
+        }
+
+        public Builder setLineColor(int color) {
+            p.lineColor = color;
+            return this;
+        }
+
+        public Builder setOnAddressSelectedListener(OnAddressSelectedListener onAddressSelectedListener) {
+            p.mOnAddressSelectedListener = onAddressSelectedListener;
+            return this;
+        }
+
+        public Builder setAddress(String province, String city, String area) {
+            p.currentProvince = province;
+            p.currentCity = city;
+            p.currentArea = area;
+            return this;
+        }
+
+        public AddressPicker build() {
+            return AddressPicker.newInstance(p);
+        }
+    }
+
+    /**
+     * 可定义参数
+     */
+    private static class Params {
+        /**
+         * 显示位置
+         */
+        private int showMode = BOTTOM_STYLE;
+        /**
+         * 偏移(负左偏,正右偏)
+         */
+        private int mOffsetX = 0;
+        /**
+         * 文字相关
+         */
+        private int textSize = 16;
+        private int textColor = 0xFF333333;
+        /**
+         * 分割线颜色
+         */
+        private int lineColor = 0xFFffffff;
+        /**
+         * 日期选择监听
+         */
+        private OnAddressSelectedListener mOnAddressSelectedListener;
+        /**
+         * 初始位置
+         */
+        private String currentProvince, currentCity, currentArea;
     }
 }

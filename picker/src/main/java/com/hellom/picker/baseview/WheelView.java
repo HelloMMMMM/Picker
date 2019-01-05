@@ -497,11 +497,10 @@ public class WheelView extends View {
                     continue;
                 }
                 //测量文字长度，若太长，缩小文字大小
+                paint.setTextSize(textSize);
                 float textWidth = paint.measureText(drawString);
                 if (textWidth > width) {
                     paint.setTextSize(textSize * width / textWidth);
-                } else {
-                    paint.setTextSize(textSize);
                 }
                 //在设置了偏移时,在可偏移区域计算偏移量
                 float topY = j * itemHeight + scrollY % itemHeight;
