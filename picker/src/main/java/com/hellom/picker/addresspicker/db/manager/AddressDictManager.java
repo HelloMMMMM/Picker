@@ -140,6 +140,7 @@ public class AddressDictManager {
             province.name = cursor.getString(cursor.getColumnIndex(TableField.ADDRESS_DICT_FIELD_NAME));
             provinceList.add(province);
         }
+        provinceList.add(createOtherProvince());
         cursor.close();
         return provinceList;
     }
@@ -191,6 +192,7 @@ public class AddressDictManager {
             city.name = cursor.getString(cursor.getColumnIndex(TableField.ADDRESS_DICT_FIELD_NAME));
             cityList.add(city);
         }
+        cityList.add(createOtherCity());
         cursor.close();
         return cityList;
     }
@@ -242,6 +244,7 @@ public class AddressDictManager {
             county.name = cursor.getString(cursor.getColumnIndex(TableField.ADDRESS_DICT_FIELD_NAME));
             countyList.add(county);
         }
+        countyList.add(createOtherCounty());
         cursor.close();
         return countyList;
     }
@@ -332,4 +335,27 @@ public class AddressDictManager {
         return count;
     }
 
+    private Province createOtherProvince() {
+        Province province = new Province();
+        province.id = -1;
+        province.code = "-1";
+        province.name = "其他";
+        return province;
+    }
+
+    private City createOtherCity() {
+        City city = new City();
+        city.id = -1;
+        city.code = "-1";
+        city.name = "其他";
+        return city;
+    }
+
+    private County createOtherCounty() {
+        County county = new County();
+        county.id = -1;
+        county.code = "-1";
+        county.name = "其他";
+        return county;
+    }
 }

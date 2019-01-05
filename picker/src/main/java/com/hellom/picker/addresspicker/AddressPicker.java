@@ -32,10 +32,10 @@ import java.util.List;
 public class AddressPicker extends DialogFragment implements View.OnClickListener {
 
     private WheelView provinceList, cityList, areaList;
-    private int currentProvince, currentCity, currentArea;
+    private int currentProvince, currentCity, currentCounty;
     private List<Province> provinceData;
     private List<City> cityData;
-    private List<County> countryData;
+    private List<County> countyData;
     private AddressDictManager mAddressDictManager;
     private static Params params;
     /**
@@ -158,8 +158,8 @@ public class AddressPicker extends DialogFragment implements View.OnClickListene
             @Override
             public void onSelectedChanged() {
                 try {
-                    County county = countryData.get(areaList.getSelectedItemPosition());
-                    currentArea = county.id;
+                    County county = countyData.get(areaList.getSelectedItemPosition());
+                    currentCounty = county.id;
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -217,13 +217,13 @@ public class AddressPicker extends DialogFragment implements View.OnClickListene
 
     private List<String> initCountryData(int cityId) {
         List<String> data = new ArrayList<>();
-        countryData = mAddressDictManager.getCountyList(cityId);
-        if (countryData != null) {
-            if (countryData.size() > 0) {
-                currentArea = countryData.get(0).id;
+        countyData = mAddressDictManager.getCountyList(cityId);
+        if (countyData != null) {
+            if (countyData.size() > 0) {
+                currentCounty = countyData.get(0).id;
             }
-            for (int i = 0; i < countryData.size(); i++) {
-                data.add(countryData.get(i).name);
+            for (int i = 0; i < countyData.size(); i++) {
+                data.add(countyData.get(i).name);
             }
         }
         return data;
@@ -282,10 +282,10 @@ public class AddressPicker extends DialogFragment implements View.OnClickListene
             return this;
         }
 
-        public Builder setAddress(String province, String city, String area) {
+        public Builder setAddress(String province, String city, String county) {
             p.currentProvince = province;
             p.currentCity = city;
-            p.currentArea = area;
+            p.currentCounty = county;
             return this;
         }
 
@@ -322,6 +322,6 @@ public class AddressPicker extends DialogFragment implements View.OnClickListene
         /**
          * 初始位置
          */
-        private String currentProvince, currentCity, currentArea;
+        private String currentProvince, currentCity, currentCounty;
     }
 }
