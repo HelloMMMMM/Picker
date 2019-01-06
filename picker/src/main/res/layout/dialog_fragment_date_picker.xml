@@ -14,7 +14,7 @@
 
     <com.hellom.picker.baseview.WheelView
         android:id="@+id/month_picker"
-        android:layout_width="0dp"
+        android:layout_width="124dp"
         android:layout_height="250dp"
         app:layout_constraintLeft_toRightOf="@id/year_picker"
         app:layout_constraintRight_toLeftOf="@+id/day_picker" />

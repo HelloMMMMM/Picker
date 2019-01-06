@@ -329,5 +329,11 @@ public class DatePicker extends DialogFragment implements View.OnClickListener {
          * 初始时间
          */
         private int currentYear, currentMonth, currentDay;
+
+        private int btnTextSize;
+
+        private int leftBtnTextColor;
+
+        private int rightBtnTextColor;
     }
 }
