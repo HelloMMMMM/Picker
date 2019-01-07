@@ -9,6 +9,9 @@ import android.view.View.OnClickListener;
 import android.widget.Toast;
 
 
+import com.hellom.picker.DatePickerBuilder;
+import com.hellom.picker.DatePickerParams;
+import com.hellom.picker.PickerConstant;
 import com.hellom.picker.addresspicker.AddressPicker;
 import com.hellom.picker.datepicker.DatePicker;
 import com.hellom.picker.R;
@@ -53,15 +56,16 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         if (fragmentManager != null) {
             DatePicker datePicker = (DatePicker) fragmentManager.findFragmentByTag("datePicker");
             if (datePicker == null) {
-                datePicker = DatePicker.builder()
-                        .setLineColor(Color.BLUE).setTextSize(18).setTextColor(Color.BLUE).setOffsetX(-16).setShowMode(DatePicker.BOTTOM_STYLE)
+                datePicker = (DatePicker) new DatePickerBuilder(new DatePickerParams())
                         .setCurrentDate(1111, 11, 11)
                         .setOnDateSelectedListener(new DatePicker.OnDateSelectedListener() {
                             @Override
                             public void onDateSelected(String year, String month, String day) {
                                 Toast.makeText(MainActivity.this, year + "-" + month + "-" + day, Toast.LENGTH_SHORT).show();
                             }
-                        }).build();
+                        })
+                        .setLineColor(Color.BLUE).setTextSize(18).setTextColor(Color.BLUE).setOffsetX(-16).setShowMode(PickerConstant.BOTTOM_STYLE)
+                        .build();
             }
             datePicker.show(fragmentManager, "datePicker");
         }

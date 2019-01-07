@@ -12,15 +12,19 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewStub;
 import android.view.Window;
 import android.view.WindowManager;
 
+import com.hellom.picker.DatePickerParams;
 import com.hellom.picker.R;
 import com.hellom.picker.baseview.WheelView;
 
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+
+import static com.hellom.picker.PickerConstant.*;
 
 
 /**
@@ -31,23 +35,16 @@ public class DatePicker extends DialogFragment implements View.OnClickListener {
 
     private WheelView yearList, monthList, dayList;
     private int currentYear, currentMonth, currentDay;
-    private static Params params;
+    private static DatePickerParams params;
 
-    /**
-     * 显示位置
-     */
-    public static final int BOTTOM_STYLE = 1;
-    public static final int CENTER_STYLE = 2;
+    private ViewStub bottomBtn;
+
     /**
      * 年份半数范围
      */
     private static final int YEAR_HALF_RANGE = 150;
 
-    public static Builder builder() {
-        return new Builder();
-    }
-
-    private static DatePicker newInstance(Params p) {
+    public static DatePicker newInstance(DatePickerParams p) {
         params = p;
         Bundle args = new Bundle();
         DatePicker fragment = new DatePicker();
@@ -69,7 +66,7 @@ public class DatePicker extends DialogFragment implements View.OnClickListener {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (params.showMode == BOTTOM_STYLE) {
+        if (params.getShowMode() == BOTTOM_STYLE) {
             setStyle(DialogFragment.STYLE_NO_TITLE, R.style.bottom_dialog_fragment);
         }
     }
@@ -86,10 +83,10 @@ public class DatePicker extends DialogFragment implements View.OnClickListener {
         Window window = getDialog().getWindow();
         if (window != null) {
             WindowManager.LayoutParams layoutParams = window.getAttributes();
-            if (params.showMode == BOTTOM_STYLE) {
+            if (params.getShowMode() == BOTTOM_STYLE) {
                 window.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
                 layoutParams.gravity = Gravity.BOTTOM;
-            } else if (params.showMode == CENTER_STYLE) {
+            } else if (params.getShowMode() == CENTER_STYLE) {
                 layoutParams.gravity = Gravity.CENTER;
             }
         }
@@ -98,9 +95,9 @@ public class DatePicker extends DialogFragment implements View.OnClickListener {
     private void initSize() {
         Window window = getDialog().getWindow();
         if (window != null) {
-            if (params.showMode == BOTTOM_STYLE) {
+            if (params.getShowMode() == BOTTOM_STYLE) {
                 window.setLayout(-1, -2);
-            } else if (params.showMode == CENTER_STYLE) {
+            } else if (params.getShowMode() == CENTER_STYLE) {
                 DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
                 window.setLayout((int) (displayMetrics.widthPixels * 0.9f), -2);
             }
@@ -108,21 +105,25 @@ public class DatePicker extends DialogFragment implements View.OnClickListener {
     }
 
     private void initView(View view) {
+        ViewStub viewStub = view.findViewById(R.id.top_btn);
+        viewStub.inflate();
         yearList = view.findViewById(R.id.year_picker);
         monthList = view.findViewById(R.id.month_picker);
         dayList = view.findViewById(R.id.day_picker);
-        yearList.setTextColor(params.textColor);
-        monthList.setTextColor(params.textColor);
-        dayList.setTextColor(params.textColor);
-        yearList.setTextSize(params.textSize);
-        monthList.setTextSize(params.textSize);
-        dayList.setTextSize(params.textSize);
-        yearList.setLineColor(params.lineColor);
-        monthList.setLineColor(params.lineColor);
-        dayList.setLineColor(params.lineColor);
-        yearList.setOffsetX(params.mOffsetX);
-        monthList.setOffsetX(params.mOffsetX);
-        dayList.setOffsetX(params.mOffsetX);
+        yearList.setTextColor(params.getTextColor());
+        monthList.setTextColor(params.getTextColor());
+        dayList.setTextColor(params.getTextColor());
+        yearList.setTextSize(params.getTextSize());
+        monthList.setTextSize(params.getTextSize());
+        dayList.setTextSize(params.getTextSize());
+        yearList.setLineColor(params.getLineColor());
+        monthList.setLineColor(params.getLineColor());
+        dayList.setLineColor(params.getLineColor());
+        yearList.setOffsetX(params.getOffsetX());
+        monthList.setOffsetX(params.getOffsetX());
+        dayList.setOffsetX(params.getOffsetX());
+        bottomBtn = view.findViewById(R.id.bottom_btn);
+        bottomBtn.inflate();
     }
 
     private void initListener(View view) {
@@ -163,9 +164,9 @@ public class DatePicker extends DialogFragment implements View.OnClickListener {
     }
 
     private void initData() {
-        currentYear = params.currentYear == 0 ? getCurrentYear() : params.currentYear;
-        currentMonth = params.currentMonth == 0 ? getCurrentMonth() : params.currentMonth;
-        currentDay = params.currentDay == 0 ? getCurrentDayOfMonth() : params.currentDay;
+        currentYear = params.getCurrentYear() == 0 ? getCurrentYear() : params.getCurrentYear();
+        currentMonth = params.getCurrentMonth() == 0 ? getCurrentMonth() : params.getCurrentMonth();
+        currentDay = params.getCurrentDay() == 0 ? getCurrentDayOfMonth() : params.getCurrentDay();
         yearList.setData(initYearData(currentYear));
         yearList.setSelectedItem(String.valueOf(currentYear));
         monthList.setData(initMonthData());
@@ -180,8 +181,8 @@ public class DatePicker extends DialogFragment implements View.OnClickListener {
         if (id == R.id.tv_cancel) {
             dismiss();
         } else if (id == R.id.tv_sure) {
-            if (params.mOnDateSelectedListener != null) {
-                params.mOnDateSelectedListener.onDateSelected(yearList.getSelectedItemData(), monthList.getSelectedItemData(), dayList.getSelectedItemData());
+            if (params.getmOnDateSelectedListener() != null) {
+                params.getmOnDateSelectedListener().onDateSelected(yearList.getSelectedItemData(), monthList.getSelectedItemData(), dayList.getSelectedItemData());
             }
             dismiss();
         }
@@ -244,96 +245,5 @@ public class DatePicker extends DialogFragment implements View.OnClickListener {
          * @param day   日
          */
         void onDateSelected(String year, String month, String day);
-    }
-
-    /**
-     * 建造者
-     */
-    public static class Builder {
-        private Params p;
-
-        private Builder() {
-            p = new Params();
-        }
-
-        public Builder setShowMode(int mode) {
-            if (mode == CENTER_STYLE || mode == BOTTOM_STYLE) {
-                p.showMode = mode;
-            }
-            return this;
-        }
-
-        public Builder setOffsetX(int offsetX) {
-            p.mOffsetX = offsetX;
-            return this;
-        }
-
-        public Builder setTextSize(int size) {
-            p.textSize = size;
-            return this;
-        }
-
-        public Builder setTextColor(int color) {
-            p.textColor = color;
-            return this;
-        }
-
-        public Builder setLineColor(int color) {
-            p.lineColor = color;
-            return this;
-        }
-
-        public Builder setOnDateSelectedListener(OnDateSelectedListener onDateSelectedListener) {
-            p.mOnDateSelectedListener = onDateSelectedListener;
-            return this;
-        }
-
-        public Builder setCurrentDate(int year, int month, int day) {
-            p.currentYear = year;
-            p.currentMonth = month;
-            p.currentDay = day;
-            return this;
-        }
-
-        public DatePicker build() {
-            return DatePicker.newInstance(p);
-        }
-    }
-
-    /**
-     * 可定义参数
-     */
-    private static class Params {
-        /**
-         * 显示位置
-         */
-        private int showMode = BOTTOM_STYLE;
-        /**
-         * 偏移(负左偏,正右偏)
-         */
-        private int mOffsetX = 0;
-        /**
-         * 文字相关
-         */
-        private int textSize = 16;
-        private int textColor = 0xFF333333;
-        /**
-         * 分割线颜色
-         */
-        private int lineColor = 0xFFffffff;
-        /**
-         * 日期选择监听
-         */
-        private OnDateSelectedListener mOnDateSelectedListener;
-        /**
-         * 初始时间
-         */
-        private int currentYear, currentMonth, currentDay;
-
-        private int btnTextSize;
-
-        private int leftBtnTextColor;
-
-        private int rightBtnTextColor;
     }
 }
