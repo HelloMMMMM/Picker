@@ -20,7 +20,7 @@ public class DatePickerParams extends PickerParams {
         return mOnDateSelectedListener;
     }
 
-    public void setmOnDateSelectedListener(DatePicker.OnDateSelectedListener mOnDateSelectedListener) {
+    public void setOnDateSelectedListener(DatePicker.OnDateSelectedListener mOnDateSelectedListener) {
         this.mOnDateSelectedListener = mOnDateSelectedListener;
     }
 

@@ -56,7 +56,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         if (fragmentManager != null) {
             DatePicker datePicker = (DatePicker) fragmentManager.findFragmentByTag("datePicker");
             if (datePicker == null) {
-                datePicker = (DatePicker) new DatePickerBuilder(new DatePickerParams())
+                datePicker = new DatePickerBuilder(new DatePickerParams())
                         .setCurrentDate(1111, 11, 11)
                         .setOnDateSelectedListener(new DatePicker.OnDateSelectedListener() {
                             @Override
