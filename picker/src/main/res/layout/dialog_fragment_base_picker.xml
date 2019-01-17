@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/C5"
+    android:orientation="vertical">
+
+    <ViewStub
+        android:id="@+id/top_btn"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout="@layout/top_btn_layout" />
+
+    <android.support.constraint.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <com.hellom.picker.baseview.WheelView
+            android:id="@+id/picker_one"
+            android:layout_width="0dp"
+            android:layout_height="250dp"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toLeftOf="@+id/picker_two" />
+
+        <com.hellom.picker.baseview.WheelView
+            android:id="@+id/picker_two"
+            android:layout_width="124dp"
+            android:layout_height="250dp"
+            app:layout_constraintLeft_toRightOf="@id/picker_one"
+            app:layout_constraintRight_toLeftOf="@+id/picker_three" />
+
+        <com.hellom.picker.baseview.WheelView
+            android:id="@+id/picker_three"
+            android:layout_width="0dp"
+            android:layout_height="250dp"
+            app:layout_constraintLeft_toRightOf="@id/picker_two"
+            app:layout_constraintRight_toRightOf="parent" />
+    </android.support.constraint.ConstraintLayout>
+
+    <ViewStub
+        android:id="@+id/bottom_btn"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout="@layout/bottom_btn_layout" />
+</LinearLayout>

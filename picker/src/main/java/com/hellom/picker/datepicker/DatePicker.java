@@ -16,7 +16,9 @@ import android.view.ViewStub;
 import android.view.Window;
 import android.view.WindowManager;
 
+import com.hellom.picker.BasePicker;
 import com.hellom.picker.DatePickerParams;
+import com.hellom.picker.PickerParams;
 import com.hellom.picker.R;
 import com.hellom.picker.baseview.WheelView;
 
@@ -31,25 +33,19 @@ import static com.hellom.picker.PickerConstant.*;
  * author:helloM
  * email:1694327880@qq.com
  */
-public class DatePicker extends DialogFragment implements View.OnClickListener {
+public class DatePicker extends BasePicker implements View.OnClickListener {
 
     private WheelView yearList, monthList, dayList;
     private int currentYear, currentMonth, currentDay;
-    private static DatePickerParams params;
-
-    private ViewStub bottomBtn;
+    private DatePickerParams params;
 
     /**
      * 年份半数范围
      */
     private static final int YEAR_HALF_RANGE = 150;
 
-    public static DatePicker newInstance(DatePickerParams p) {
-        params = p;
-        Bundle args = new Bundle();
-        DatePicker fragment = new DatePicker();
-        fragment.setArguments(args);
-        return fragment;
+    protected DatePicker(PickerParams params) {
+        super(params);
     }
 
     @Nullable
@@ -122,8 +118,6 @@ public class DatePicker extends DialogFragment implements View.OnClickListener {
         yearList.setOffsetX(params.getOffsetX());
         monthList.setOffsetX(params.getOffsetX());
         dayList.setOffsetX(params.getOffsetX());
-        bottomBtn = view.findViewById(R.id.bottom_btn);
-        bottomBtn.inflate();
     }
 
     private void initListener(View view) {

@@ -15,4 +15,10 @@ public class PickerConstant {
      */
     public static final int BOTTOM_BTN_STYLE = 1;
     public static final int TOP_BTN_STYLE = 2;
+    /**
+     * 内容文字对齐方式
+     */
+    public static final int CENTER_ALIGN_MODE = 1;
+    public static final int LEFT_ALIGN_MODE = 2;
+    public static final int RIGHT_ALIGN_MODE = 3;
 }
