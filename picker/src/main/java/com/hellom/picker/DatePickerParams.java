@@ -1,5 +1,7 @@
 package com.hellom.picker;
 
+import android.os.Parcel;
+
 import com.hellom.picker.datepicker.DatePicker;
 
 /**
@@ -16,7 +18,7 @@ public class DatePickerParams extends PickerParams {
      */
     private int currentYear, currentMonth, currentDay;
 
-    public DatePicker.OnDateSelectedListener getmOnDateSelectedListener() {
+    public DatePicker.OnDateSelectedListener getOnDateSelectedListener() {
         return mOnDateSelectedListener;
     }
 

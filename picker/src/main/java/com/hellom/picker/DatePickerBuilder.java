@@ -26,7 +26,7 @@ public class DatePickerBuilder extends BasePickerBuilder<DatePickerBuilder, Date
 
     @Override
     public DatePicker build() {
-        return DatePicker.newInstance(this.params);
+        return new DatePicker(this.params);
     }
 
     @Override

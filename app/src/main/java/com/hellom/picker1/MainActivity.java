@@ -1,6 +1,8 @@
 package com.hellom.picker1;
 
 import android.graphics.Color;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -54,19 +56,16 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     private void showDatePicker() {
         FragmentManager fragmentManager = getSupportFragmentManager();
         if (fragmentManager != null) {
-            DatePicker datePicker = (DatePicker) fragmentManager.findFragmentByTag("datePicker");
-            if (datePicker == null) {
-                datePicker = new DatePickerBuilder(new DatePickerParams())
-                        .setCurrentDate(1111, 11, 11)
-                        .setOnDateSelectedListener(new DatePicker.OnDateSelectedListener() {
-                            @Override
-                            public void onDateSelected(String year, String month, String day) {
-                                Toast.makeText(MainActivity.this, year + "-" + month + "-" + day, Toast.LENGTH_SHORT).show();
-                            }
-                        })
-                        .setLineColor(Color.BLUE).setTextSize(18).setTextColor(Color.BLUE).setOffsetX(-16).setShowMode(PickerConstant.BOTTOM_STYLE)
-                        .build();
-            }
+            DatePicker datePicker = new DatePickerBuilder(new DatePickerParams())
+                    .setCurrentDate(1111, 11, 11)
+                    .setOnDateSelectedListener(new DatePicker.OnDateSelectedListener() {
+                        @Override
+                        public void onDateSelected(String year, String month, String day) {
+                            Toast.makeText(MainActivity.this, year + "-" + month + "-" + day, Toast.LENGTH_SHORT).show();
+                        }
+                    })
+                    .setLineColor(Color.BLUE).setTextSize(18).setTextColor(Color.BLUE).setOffsetX(-16).setShowMode(PickerConstant.BOTTOM_STYLE)
+                    .build();
             datePicker.show(fragmentManager, "datePicker");
         }
     }

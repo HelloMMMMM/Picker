@@ -9,7 +9,6 @@ import android.graphics.LinearGradient;
 import android.graphics.Paint;
 import android.graphics.Shader;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
@@ -18,6 +17,8 @@ import android.widget.OverScroller;
 import com.hellom.picker.R;
 
 import java.util.List;
+
+import static com.hellom.picker.PickerConstant.*;
 
 /**
  * author:helloM
@@ -138,9 +139,6 @@ public class WheelView extends View {
      * 文字对齐方式,默认为居中
      */
     private int alignMode = CENTER_ALIGN_MODE;
-    public static final int CENTER_ALIGN_MODE = 1;
-    public static final int LEFT_ALIGN_MODE = 2;
-    public static final int RIGHT_ALIGN_MODE = 3;
     /**
      * 数据
      */

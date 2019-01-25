@@ -1,155 +1,82 @@
 package com.hellom.picker.datepicker;
 
-import android.app.Dialog;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
-import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v4.app.DialogFragment;
-import android.util.DisplayMetrics;
-import android.view.Gravity;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.view.ViewStub;
-import android.view.Window;
-import android.view.WindowManager;
+import android.support.v4.app.FragmentManager;
 
 import com.hellom.picker.BasePicker;
 import com.hellom.picker.DatePickerParams;
-import com.hellom.picker.PickerParams;
-import com.hellom.picker.R;
-import com.hellom.picker.baseview.WheelView;
 
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
-
-import static com.hellom.picker.PickerConstant.*;
 
 
 /**
  * author:helloM
  * email:1694327880@qq.com
  */
-public class DatePicker extends BasePicker implements View.OnClickListener {
+public class DatePicker {
 
-    private WheelView yearList, monthList, dayList;
     private int currentYear, currentMonth, currentDay;
     private DatePickerParams params;
+    private BasePicker basePicker;
 
     /**
      * 年份半数范围
      */
     private static final int YEAR_HALF_RANGE = 150;
 
-    protected DatePicker(PickerParams params) {
-        super(params);
-    }
-
-    @Nullable
-    @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        initStyle();
-        View view = inflater.inflate(R.layout.dialog_fragment_date_picker, container, false);
-        initView(view);
-        initListener(view);
+    public DatePicker(DatePickerParams params) {
+        this.params = params;
+        initView();
+        initListener();
         initData();
-        return view;
     }
 
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (params.getShowMode() == BOTTOM_STYLE) {
-            setStyle(DialogFragment.STYLE_NO_TITLE, R.style.bottom_dialog_fragment);
-        }
+    private void initView() {
+        basePicker = BasePicker.newInstance(params);
     }
 
-    @Override
-    public void onStart() {
-        super.onStart();
-        initSize();
-    }
-
-    private void initStyle() {
-        Dialog dialog = getDialog();
-        dialog.setCanceledOnTouchOutside(true);
-        Window window = getDialog().getWindow();
-        if (window != null) {
-            WindowManager.LayoutParams layoutParams = window.getAttributes();
-            if (params.getShowMode() == BOTTOM_STYLE) {
-                window.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-                layoutParams.gravity = Gravity.BOTTOM;
-            } else if (params.getShowMode() == CENTER_STYLE) {
-                layoutParams.gravity = Gravity.CENTER;
-            }
-        }
-    }
-
-    private void initSize() {
-        Window window = getDialog().getWindow();
-        if (window != null) {
-            if (params.getShowMode() == BOTTOM_STYLE) {
-                window.setLayout(-1, -2);
-            } else if (params.getShowMode() == CENTER_STYLE) {
-                DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
-                window.setLayout((int) (displayMetrics.widthPixels * 0.9f), -2);
-            }
-        }
-    }
-
-    private void initView(View view) {
-        ViewStub viewStub = view.findViewById(R.id.top_btn);
-        viewStub.inflate();
-        yearList = view.findViewById(R.id.year_picker);
-        monthList = view.findViewById(R.id.month_picker);
-        dayList = view.findViewById(R.id.day_picker);
-        yearList.setTextColor(params.getTextColor());
-        monthList.setTextColor(params.getTextColor());
-        dayList.setTextColor(params.getTextColor());
-        yearList.setTextSize(params.getTextSize());
-        monthList.setTextSize(params.getTextSize());
-        dayList.setTextSize(params.getTextSize());
-        yearList.setLineColor(params.getLineColor());
-        monthList.setLineColor(params.getLineColor());
-        dayList.setLineColor(params.getLineColor());
-        yearList.setOffsetX(params.getOffsetX());
-        monthList.setOffsetX(params.getOffsetX());
-        dayList.setOffsetX(params.getOffsetX());
-    }
-
-    private void initListener(View view) {
-        view.findViewById(R.id.tv_cancel).setOnClickListener(this);
-        view.findViewById(R.id.tv_sure).setOnClickListener(this);
-        yearList.setOnSelectedChangedListener(new WheelView.OnSelectedChangedListener() {
+    private void initListener() {
+        basePicker.setOnClickListener(new BasePicker.OnClickListener() {
             @Override
-            public void onSelectedChanged() {
+            public void cancel() {
+                basePicker.dismiss();
+            }
+
+            @Override
+            public void sure() {
+                if (params.getOnDateSelectedListener() != null) {
+                    params.getOnDateSelectedListener().onDateSelected(basePicker.getPickerOneSelectedItem(),
+                            basePicker.getPickerTwoSelectedItem(), basePicker.getPickerThreeSelectedItem());
+                }
+                basePicker.dismiss();
+            }
+        });
+        basePicker.setOnPickerSelectedChangedListener(new BasePicker.OnPickerSelectedChangedListener() {
+            @Override
+            public void onPickerOneSelectedChanged(String data, int position) {
                 try {
-                    currentYear = Integer.parseInt(yearList.getSelectedItemData());
-                    dayList.setData(initDayData(currentYear, currentMonth));
+                    currentYear = Integer.parseInt(data);
+                    basePicker.setPickerThreeData(initDayData(currentYear, currentMonth));
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
-        });
-        monthList.setOnSelectedChangedListener(new WheelView.OnSelectedChangedListener() {
+
             @Override
-            public void onSelectedChanged() {
+            public void onPickerTwoSelectedChanged(String data, int position) {
                 try {
-                    currentMonth = Integer.parseInt(monthList.getSelectedItemData());
-                    dayList.setData(initDayData(currentYear, currentMonth));
+                    currentMonth = Integer.parseInt(data);
+                    basePicker.setPickerThreeData(initDayData(currentYear, currentMonth));
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
-        });
-        dayList.setOnSelectedChangedListener(new WheelView.OnSelectedChangedListener() {
+
             @Override
-            public void onSelectedChanged() {
+            public void onPickerThreeSelectedChanged(String data, int position) {
                 try {
-                    currentDay = Integer.parseInt(dayList.getSelectedItemData());
+                    currentDay = Integer.parseInt(data);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -161,25 +88,12 @@ public class DatePicker extends BasePicker implements View.OnClickListener {
         currentYear = params.getCurrentYear() == 0 ? getCurrentYear() : params.getCurrentYear();
         currentMonth = params.getCurrentMonth() == 0 ? getCurrentMonth() : params.getCurrentMonth();
         currentDay = params.getCurrentDay() == 0 ? getCurrentDayOfMonth() : params.getCurrentDay();
-        yearList.setData(initYearData(currentYear));
-        yearList.setSelectedItem(String.valueOf(currentYear));
-        monthList.setData(initMonthData());
-        monthList.setSelectedItem(String.valueOf(currentMonth));
-        dayList.setData(initDayData(currentYear, currentMonth));
-        dayList.setSelectedItem(String.valueOf(currentDay));
-    }
-
-    @Override
-    public void onClick(View v) {
-        int id = v.getId();
-        if (id == R.id.tv_cancel) {
-            dismiss();
-        } else if (id == R.id.tv_sure) {
-            if (params.getmOnDateSelectedListener() != null) {
-                params.getmOnDateSelectedListener().onDateSelected(yearList.getSelectedItemData(), monthList.getSelectedItemData(), dayList.getSelectedItemData());
-            }
-            dismiss();
-        }
+        basePicker.setPickerOneData(initYearData(currentYear));
+        basePicker.setPickerOneSelectedItem(String.valueOf(currentYear));
+        basePicker.setPickerTwoData(initMonthData());
+        basePicker.setPickerTwoSelectedItem(String.valueOf(currentMonth));
+        basePicker.setPickerThreeData(initDayData(currentYear, currentMonth));
+        basePicker.setPickerThreeSelectedItem(String.valueOf(currentDay));
     }
 
     private int getCurrentYear() {
@@ -228,6 +142,10 @@ public class DatePicker extends BasePicker implements View.OnClickListener {
             yearData.add(String.valueOf(i));
         }
         return yearData;
+    }
+
+    public void show(FragmentManager fragmentManager, String tag) {
+        basePicker.show(fragmentManager, tag);
     }
 
     public interface OnDateSelectedListener {

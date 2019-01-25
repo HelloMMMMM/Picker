@@ -1,6 +1,8 @@
 package com.hellom.picker;
 
 import android.graphics.drawable.Drawable;
+import android.os.Parcel;
+import android.os.Parcelable;
 
 import static com.hellom.picker.PickerConstant.*;
 
@@ -8,7 +10,7 @@ import static com.hellom.picker.PickerConstant.*;
  * author:helloM
  * email:1694327880@qq.com
  */
-public class PickerParams {
+public class PickerParams implements Parcelable {
     /**
      * 显示位置
      */
@@ -16,30 +18,30 @@ public class PickerParams {
     /**
      * 偏移(负左偏,正右偏)
      */
-    private int mOffsetX = 0;
+    private int mOffsetX = DEFAULT_OFFSET_X;
     /**
      * 文字相关
      */
-    private int textSize = 16;
-    private int textColor = 0xFF333333;
+    private int textSize = DEFAULT_TEXT_SIZE;
+    private int textColor = DEFAULT_TEXT_COLOR;
     /**
      * 分割线颜色
      */
-    private int lineColor = 0xFFffffff;
+    private int lineColor = DEFAULT_LINE_COLOR;
 
     /**
      * 按钮样式设置
      */
-    private int btnStyle = PickerConstant.BOTTOM_BTN_STYLE;
+    private int btnStyle = BOTTOM_BTN_STYLE;
     private String title;
-    private String leftText;
-    private String rightText;
-    private int titleTextColor = 0xFF000000;
-    private int leftTextColor = 0xFF000000;
-    private int rightTextColor = 0xFF000000;
-    private int titleTextSize = 18;
-    private int leftTextSize = 16;
-    private int rightTextSize = 16;
+    private String leftText = DEFAULT_LEFT_TEXT;
+    private String rightText = DEFAULT_RIGHT_TEXT;
+    private int titleTextColor = DEFAULT_BTN_TEXT_COLOR;
+    private int leftTextColor = DEFAULT_BTN_TEXT_COLOR;
+    private int rightTextColor = DEFAULT_BTN_TEXT_COLOR;
+    private int titleTextSize = DEFAULT_BTN_TITLE_TEXT_SIZE;
+    private int leftTextSize = DEFAULT_BTN_TEXT_SIZE;
+    private int rightTextSize = DEFAULT_BTN_TEXT_SIZE;
     private int leftBtnBackgroundColor;
     private int rightBtnBackgroundColor;
     private int leftBtnResource;
@@ -48,8 +50,50 @@ public class PickerParams {
     private Drawable rightBtnDrawable;
     private int alignMode;
     private boolean isCircle;
-    private int showSize;
-    private float velocityRate;
+    private int showSize = DEFAULT_SHOW_SIZE;
+    private float velocityRate = DEFAULT_VELOCITYRATE;
+
+    protected PickerParams() {
+
+    }
+
+    protected PickerParams(Parcel in) {
+        showMode = in.readInt();
+        mOffsetX = in.readInt();
+        textSize = in.readInt();
+        textColor = in.readInt();
+        lineColor = in.readInt();
+        btnStyle = in.readInt();
+        title = in.readString();
+        leftText = in.readString();
+        rightText = in.readString();
+        titleTextColor = in.readInt();
+        leftTextColor = in.readInt();
+        rightTextColor = in.readInt();
+        titleTextSize = in.readInt();
+        leftTextSize = in.readInt();
+        rightTextSize = in.readInt();
+        leftBtnBackgroundColor = in.readInt();
+        rightBtnBackgroundColor = in.readInt();
+        leftBtnResource = in.readInt();
+        rightBtnResource = in.readInt();
+        alignMode = in.readInt();
+        isCircle = in.readByte() != 0;
+        showSize = in.readInt();
+        velocityRate = in.readFloat();
+    }
+
+    public static final Creator<PickerParams> CREATOR = new Creator<PickerParams>() {
+        @Override
+        public PickerParams createFromParcel(Parcel in) {
+            return new PickerParams(in);
+        }
+
+        @Override
+        public PickerParams[] newArray(int size) {
+            return new PickerParams[size];
+        }
+    };
 
     public int getShowMode() {
         return showMode;
@@ -249,5 +293,37 @@ public class PickerParams {
 
     public void setVelocityRate(float velocityRate) {
         this.velocityRate = velocityRate;
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(showMode);
+        dest.writeInt(mOffsetX);
+        dest.writeInt(textSize);
+        dest.writeInt(textColor);
+        dest.writeInt(lineColor);
+        dest.writeInt(btnStyle);
+        dest.writeString(title);
+        dest.writeString(leftText);
+        dest.writeString(rightText);
+        dest.writeInt(titleTextColor);
+        dest.writeInt(leftTextColor);
+        dest.writeInt(rightTextColor);
+        dest.writeInt(titleTextSize);
+        dest.writeInt(leftTextSize);
+        dest.writeInt(rightTextSize);
+        dest.writeInt(leftBtnBackgroundColor);
+        dest.writeInt(rightBtnBackgroundColor);
+        dest.writeInt(leftBtnResource);
+        dest.writeInt(rightBtnResource);
+        dest.writeInt(alignMode);
+        dest.writeByte((byte) (isCircle ? 1 : 0));
+        dest.writeInt(showSize);
+        dest.writeFloat(velocityRate);
     }
 }
