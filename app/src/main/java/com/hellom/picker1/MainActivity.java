@@ -83,7 +83,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         public void onAddressSelected(String year, String month, String day) {
                             Toast.makeText(MainActivity.this, year + "-" + month + "-" + day, Toast.LENGTH_SHORT).show();
                         }
-                    }).build();
+                    }).setCircle(true).build();
             addressPicker.show(fragmentManager, "addressPicker");
         }
     }
