@@ -23,7 +23,7 @@
             android:layout_height="wrap_content"
             android:text="@string/address_picker" />
 
-        <com.hellom.picker.baseview.WheelView
+        <com.hellom.picker.base.WheelView
             android:id="@+id/wheel"
             android:layout_width="match_parent"
             android:layout_height="250dp"

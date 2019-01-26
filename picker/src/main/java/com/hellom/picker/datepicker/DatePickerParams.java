@@ -1,7 +1,6 @@
-package com.hellom.picker;
+package com.hellom.picker.datepicker;
 
-import android.os.Parcel;
-
+import com.hellom.picker.base.PickerParams;
 import com.hellom.picker.datepicker.DatePicker;
 
 /**
@@ -18,35 +17,35 @@ public class DatePickerParams extends PickerParams {
      */
     private int currentYear, currentMonth, currentDay;
 
-    public DatePicker.OnDateSelectedListener getOnDateSelectedListener() {
+    DatePicker.OnDateSelectedListener getOnDateSelectedListener() {
         return mOnDateSelectedListener;
     }
 
-    public void setOnDateSelectedListener(DatePicker.OnDateSelectedListener mOnDateSelectedListener) {
+    void setOnDateSelectedListener(DatePicker.OnDateSelectedListener mOnDateSelectedListener) {
         this.mOnDateSelectedListener = mOnDateSelectedListener;
     }
 
-    public int getCurrentYear() {
+    int getCurrentYear() {
         return currentYear;
     }
 
-    public void setCurrentYear(int currentYear) {
+    void setCurrentYear(int currentYear) {
         this.currentYear = currentYear;
     }
 
-    public int getCurrentMonth() {
+    int getCurrentMonth() {
         return currentMonth;
     }
 
-    public void setCurrentMonth(int currentMonth) {
+    void setCurrentMonth(int currentMonth) {
         this.currentMonth = currentMonth;
     }
 
-    public int getCurrentDay() {
+    int getCurrentDay() {
         return currentDay;
     }
 
-    public void setCurrentDay(int currentDay) {
+    void setCurrentDay(int currentDay) {
         this.currentDay = currentDay;
     }
 }

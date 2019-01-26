@@ -1,4 +1,4 @@
-package com.hellom.picker;
+package com.hellom.picker.base;
 
 import android.graphics.drawable.Drawable;
 
@@ -14,7 +14,7 @@ public abstract class BasePickerBuilder<K extends BasePickerBuilder, T> {
 
     private PickerParams params;
 
-    BasePickerBuilder(PickerParams params) {
+    public BasePickerBuilder(PickerParams params) {
         this.params = params;
     }
 

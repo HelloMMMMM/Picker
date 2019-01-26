@@ -1,4 +1,4 @@
-package com.hellom.picker;
+package com.hellom.picker.base;
 
 import android.app.Dialog;
 import android.graphics.Color;
@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
+import android.support.v4.app.FragmentManager;
 import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -17,11 +18,11 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.TextView;
 
-import com.hellom.picker.baseview.WheelView;
+import com.hellom.picker.R;
 
 import java.util.List;
 
-import static com.hellom.picker.PickerConstant.*;
+import static com.hellom.picker.base.PickerConstant.*;
 
 /**
  * author:helloM
@@ -331,14 +332,23 @@ public class BasePicker extends DialogFragment implements View.OnClickListener {
     }
 
     public int getPickerOneSelectedItemPosition() {
+        if (pickerOne != null) {
+            pickerOneSelectedItemPosition = pickerOne.getSelectedItemPosition();
+        }
         return pickerOneSelectedItemPosition;
     }
 
     public int getPickerTwoSelectedItemPosition() {
+        if (pickerTwo != null) {
+            pickerTwoSelectedItemPosition = pickerTwo.getSelectedItemPosition();
+        }
         return pickerTwoSelectedItemPosition;
     }
 
     public int getPickerThreeSelectedItemPosition() {
+        if (pickerThree != null) {
+            pickerThreeSelectedItemPosition = pickerThree.getSelectedItemPosition();
+        }
         return pickerThreeSelectedItemPosition;
     }
 

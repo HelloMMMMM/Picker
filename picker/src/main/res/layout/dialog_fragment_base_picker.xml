@@ -16,21 +16,21 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <com.hellom.picker.baseview.WheelView
+        <com.hellom.picker.base.WheelView
             android:id="@+id/picker_one"
             android:layout_width="0dp"
             android:layout_height="250dp"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toLeftOf="@+id/picker_two" />
 
-        <com.hellom.picker.baseview.WheelView
+        <com.hellom.picker.base.WheelView
             android:id="@+id/picker_two"
             android:layout_width="124dp"
             android:layout_height="250dp"
             app:layout_constraintLeft_toRightOf="@id/picker_one"
             app:layout_constraintRight_toLeftOf="@+id/picker_three" />
 
-        <com.hellom.picker.baseview.WheelView
+        <com.hellom.picker.base.WheelView
             android:id="@+id/picker_three"
             android:layout_width="0dp"
             android:layout_height="250dp"

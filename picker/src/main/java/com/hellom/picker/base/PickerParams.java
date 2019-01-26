@@ -1,10 +1,10 @@
-package com.hellom.picker;
+package com.hellom.picker.base;
 
 import android.graphics.drawable.Drawable;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import static com.hellom.picker.PickerConstant.*;
+import static com.hellom.picker.base.PickerConstant.*;
 
 /**
  * author:helloM
@@ -51,13 +51,13 @@ public class PickerParams implements Parcelable {
     private int alignMode;
     private boolean isCircle;
     private int showSize = DEFAULT_SHOW_SIZE;
-    private float velocityRate = DEFAULT_VELOCITYRATE;
+    private float velocityRate = DEFAULT_VELOCITY_RATE;
 
     protected PickerParams() {
 
     }
 
-    protected PickerParams(Parcel in) {
+    private PickerParams(Parcel in) {
         showMode = in.readInt();
         mOffsetX = in.readInt();
         textSize = in.readInt();
@@ -95,203 +95,203 @@ public class PickerParams implements Parcelable {
         }
     };
 
-    public int getShowMode() {
+    int getShowMode() {
         return showMode;
     }
 
-    public void setShowMode(int showMode) {
+    void setShowMode(int showMode) {
         this.showMode = showMode;
     }
 
-    public int getOffsetX() {
+    int getOffsetX() {
         return mOffsetX;
     }
 
-    public void setOffsetX(int mOffsetX) {
+    void setOffsetX(int mOffsetX) {
         this.mOffsetX = mOffsetX;
     }
 
-    public int getTextSize() {
+    int getTextSize() {
         return textSize;
     }
 
-    public void setTextSize(int textSize) {
+    void setTextSize(int textSize) {
         this.textSize = textSize;
     }
 
-    public int getTextColor() {
+    int getTextColor() {
         return textColor;
     }
 
-    public void setTextColor(int textColor) {
+    void setTextColor(int textColor) {
         this.textColor = textColor;
     }
 
-    public int getLineColor() {
+    int getLineColor() {
         return lineColor;
     }
 
-    public void setLineColor(int lineColor) {
+    void setLineColor(int lineColor) {
         this.lineColor = lineColor;
     }
 
-    public int getBtnStyle() {
+    int getBtnStyle() {
         return btnStyle;
     }
 
-    public void setBtnStyle(int btnStyle) {
+    void setBtnStyle(int btnStyle) {
         this.btnStyle = btnStyle;
     }
 
-    public String getTitle() {
+    String getTitle() {
         return title;
     }
 
-    public void setTitle(String title) {
+    void setTitle(String title) {
         this.title = title;
     }
 
-    public String getLeftText() {
+    String getLeftText() {
         return leftText;
     }
 
-    public void setLeftText(String leftText) {
+    void setLeftText(String leftText) {
         this.leftText = leftText;
     }
 
-    public String getRightText() {
+    String getRightText() {
         return rightText;
     }
 
-    public void setRightText(String rightText) {
+    void setRightText(String rightText) {
         this.rightText = rightText;
     }
 
-    public int getTitleTextColor() {
+    int getTitleTextColor() {
         return titleTextColor;
     }
 
-    public void setTitleTextColor(int titleTextColor) {
+    void setTitleTextColor(int titleTextColor) {
         this.titleTextColor = titleTextColor;
     }
 
-    public int getLeftTextColor() {
+    int getLeftTextColor() {
         return leftTextColor;
     }
 
-    public void setLeftTextColor(int leftTextColor) {
+    void setLeftTextColor(int leftTextColor) {
         this.leftTextColor = leftTextColor;
     }
 
-    public int getRightTextColor() {
+    int getRightTextColor() {
         return rightTextColor;
     }
 
-    public void setRightTextColor(int rightTextColor) {
+    void setRightTextColor(int rightTextColor) {
         this.rightTextColor = rightTextColor;
     }
 
-    public int getTitleTextSize() {
+    int getTitleTextSize() {
         return titleTextSize;
     }
 
-    public void setTitleTextSize(int titleTextSize) {
+    void setTitleTextSize(int titleTextSize) {
         this.titleTextSize = titleTextSize;
     }
 
-    public int getLeftTextSize() {
+    int getLeftTextSize() {
         return leftTextSize;
     }
 
-    public void setLeftTextSize(int leftTextSize) {
+    void setLeftTextSize(int leftTextSize) {
         this.leftTextSize = leftTextSize;
     }
 
-    public int getRightTextSize() {
+    int getRightTextSize() {
         return rightTextSize;
     }
 
-    public void setRightTextSize(int rightTextSize) {
+    void setRightTextSize(int rightTextSize) {
         this.rightTextSize = rightTextSize;
     }
 
-    public int getLeftBtnBackgroundColor() {
+    int getLeftBtnBackgroundColor() {
         return leftBtnBackgroundColor;
     }
 
-    public void setLeftBtnBackgroundColor(int leftBtnBackgroundColor) {
+    void setLeftBtnBackgroundColor(int leftBtnBackgroundColor) {
         this.leftBtnBackgroundColor = leftBtnBackgroundColor;
     }
 
-    public int getRightBtnBackgroundColor() {
+    int getRightBtnBackgroundColor() {
         return rightBtnBackgroundColor;
     }
 
-    public void setRightBtnBackgroundColor(int rightBtnBackgroundColor) {
+    void setRightBtnBackgroundColor(int rightBtnBackgroundColor) {
         this.rightBtnBackgroundColor = rightBtnBackgroundColor;
     }
 
-    public Drawable getLeftBtnDrawable() {
+    Drawable getLeftBtnDrawable() {
         return leftBtnDrawable;
     }
 
-    public void setLeftBtnDrawable(Drawable leftBtnDrawable) {
+    void setLeftBtnDrawable(Drawable leftBtnDrawable) {
         this.leftBtnDrawable = leftBtnDrawable;
     }
 
-    public Drawable getRightBtnDrawable() {
+    Drawable getRightBtnDrawable() {
         return rightBtnDrawable;
     }
 
-    public void setRightBtnDrawable(Drawable rightBtnDrawable) {
+    void setRightBtnDrawable(Drawable rightBtnDrawable) {
         this.rightBtnDrawable = rightBtnDrawable;
     }
 
-    public int getLeftBtnResource() {
+    int getLeftBtnResource() {
         return leftBtnResource;
     }
 
-    public void setLeftBtnResource(int leftBtnResource) {
+    void setLeftBtnResource(int leftBtnResource) {
         this.leftBtnResource = leftBtnResource;
     }
 
-    public int getRightBtnResource() {
+    int getRightBtnResource() {
         return rightBtnResource;
     }
 
-    public void setRightBtnResource(int rightBtnResource) {
+    void setRightBtnResource(int rightBtnResource) {
         this.rightBtnResource = rightBtnResource;
     }
 
-    public int getAlignMode() {
+    int getAlignMode() {
         return alignMode;
     }
 
-    public void setAlignMode(int alignMode) {
+    void setAlignMode(int alignMode) {
         this.alignMode = alignMode;
     }
 
-    public boolean isCircle() {
+    boolean isCircle() {
         return isCircle;
     }
 
-    public void setCircle(boolean circle) {
+    void setCircle(boolean circle) {
         isCircle = circle;
     }
 
-    public int getShowSize() {
+    int getShowSize() {
         return showSize;
     }
 
-    public void setShowSize(int showSize) {
+    void setShowSize(int showSize) {
         this.showSize = showSize;
     }
 
-    public float getVelocityRate() {
+    float getVelocityRate() {
         return velocityRate;
     }
 
-    public void setVelocityRate(float velocityRate) {
+    void setVelocityRate(float velocityRate) {
         this.velocityRate = velocityRate;
     }
 

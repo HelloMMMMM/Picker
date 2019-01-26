@@ -2,8 +2,8 @@ package com.hellom.picker.datepicker;
 
 import android.support.v4.app.FragmentManager;
 
-import com.hellom.picker.BasePicker;
-import com.hellom.picker.DatePickerParams;
+import com.hellom.picker.base.BasePicker;
+import com.hellom.picker.base.IBasePicker;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -14,7 +14,7 @@ import java.util.List;
  * author:helloM
  * email:1694327880@qq.com
  */
-public class DatePicker {
+public class DatePicker implements IBasePicker {
 
     private int currentYear, currentMonth, currentDay;
     private DatePickerParams params;
@@ -25,7 +25,7 @@ public class DatePicker {
      */
     private static final int YEAR_HALF_RANGE = 150;
 
-    public DatePicker(DatePickerParams params) {
+    DatePicker(DatePickerParams params) {
         this.params = params;
         initView();
         initListener();
@@ -144,6 +144,7 @@ public class DatePicker {
         return yearData;
     }
 
+    @Override
     public void show(FragmentManager fragmentManager, String tag) {
         basePicker.show(fragmentManager, tag);
     }

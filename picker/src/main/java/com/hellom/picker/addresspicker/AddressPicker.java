@@ -1,26 +1,16 @@
 package com.hellom.picker.addresspicker;
 
-import android.app.Dialog;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
-import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v4.app.DialogFragment;
-import android.util.DisplayMetrics;
-import android.view.Gravity;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.view.Window;
-import android.view.WindowManager;
 
-import com.hellom.picker.R;
+import android.content.Context;
+import android.support.v4.app.FragmentManager;
+
 import com.hellom.picker.addresspicker.bean.City;
 import com.hellom.picker.addresspicker.bean.County;
 import com.hellom.picker.addresspicker.bean.Province;
 import com.hellom.picker.addresspicker.db.manager.AddressDictManager;
-import com.hellom.picker.baseview.WheelView;
+import com.hellom.picker.base.BasePicker;
+import com.hellom.picker.base.IBasePicker;
+
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,136 +19,73 @@ import java.util.List;
  * author:helloM
  * email:1694327880@qq.com
  */
-public class AddressPicker extends DialogFragment implements View.OnClickListener {
+public class AddressPicker implements IBasePicker {
 
-    private WheelView provinceList, cityList, countyList;
     private int currentProvince = -1, currentCity = -1, currentCounty = -1;
     private List<Province> provinceData;
     private List<City> cityData;
     private List<County> countyData;
     private AddressDictManager mAddressDictManager;
-    private static Params params;
-    /**
-     * 显示位置
-     */
-    public static final int BOTTOM_STYLE = 1;
-    public static final int CENTER_STYLE = 2;
+    private BasePicker basePicker;
+    private AddressPickerParams params;
+    private Context context;
 
-    public static Builder builder() {
-        return new Builder();
-    }
-
-    private static AddressPicker newInstance(Params p) {
-        params = p;
-        Bundle args = new Bundle();
-        AddressPicker fragment = new AddressPicker();
-        fragment.setArguments(args);
-        return fragment;
-    }
-
-    @Nullable
-    @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        initStyle();
-        View view = inflater.inflate(R.layout.dialog_fragment_address_picker, container, false);
-        initView(view);
-        initListener(view);
+    AddressPicker(Context context, AddressPickerParams params) {
+        this.context = context;
+        this.params = params;
+        initView();
+        initListener();
         initData();
-        return view;
     }
 
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (params.showMode == BOTTOM_STYLE) {
-            setStyle(DialogFragment.STYLE_NO_TITLE, R.style.bottom_dialog_fragment);
-        }
+    private void initView() {
+        basePicker = BasePicker.newInstance(params);
     }
 
-    @Override
-    public void onStart() {
-        super.onStart();
-        initSize();
-    }
-
-    private void initStyle() {
-        Dialog dialog = getDialog();
-        dialog.setCanceledOnTouchOutside(true);
-        Window window = getDialog().getWindow();
-        if (window != null) {
-            WindowManager.LayoutParams layoutParams = window.getAttributes();
-            if (params.showMode == BOTTOM_STYLE) {
-                window.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-                layoutParams.gravity = Gravity.BOTTOM;
-            } else if (params.showMode == CENTER_STYLE) {
-                layoutParams.gravity = Gravity.CENTER;
-            }
-        }
-    }
-
-    private void initSize() {
-        Window window = getDialog().getWindow();
-        if (window != null) {
-            if (params.showMode == BOTTOM_STYLE) {
-                window.setLayout(-1, -2);
-            } else if (params.showMode == CENTER_STYLE) {
-                DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
-                window.setLayout((int) (displayMetrics.widthPixels * 0.9f), -2);
-            }
-        }
-    }
-
-    private void initView(View view) {
-        provinceList = view.findViewById(R.id.province_picker);
-        cityList = view.findViewById(R.id.city_picker);
-        countyList = view.findViewById(R.id.area_picker);
-        provinceList.setTextColor(params.textColor);
-        cityList.setTextColor(params.textColor);
-        countyList.setTextColor(params.textColor);
-        provinceList.setTextSize(params.textSize);
-        cityList.setTextSize(params.textSize);
-        countyList.setTextSize(params.textSize);
-        provinceList.setLineColor(params.lineColor);
-        cityList.setLineColor(params.lineColor);
-        countyList.setLineColor(params.lineColor);
-        provinceList.setOffsetX(params.mOffsetX);
-        cityList.setOffsetX(params.mOffsetX);
-        countyList.setOffsetX(params.mOffsetX);
-    }
-
-    private void initListener(View view) {
-        view.findViewById(R.id.tv_cancel).setOnClickListener(this);
-        view.findViewById(R.id.tv_sure).setOnClickListener(this);
-        provinceList.setOnSelectedChangedListener(new WheelView.OnSelectedChangedListener() {
+    private void initListener() {
+        basePicker.setOnClickListener(new BasePicker.OnClickListener() {
             @Override
-            public void onSelectedChanged() {
+            public void cancel() {
+                basePicker.dismiss();
+            }
+
+            @Override
+            public void sure() {
+                if (params.getOnAddressSelectedListener() != null) {
+                    params.getOnAddressSelectedListener().onAddressSelected(basePicker.getPickerOneSelectedItem(),
+                            basePicker.getPickerTwoSelectedItem(), basePicker.getPickerThreeSelectedItem());
+                }
+                basePicker.dismiss();
+            }
+        });
+        basePicker.setOnPickerSelectedChangedListener(new BasePicker.OnPickerSelectedChangedListener() {
+            @Override
+            public void onPickerOneSelectedChanged(String data, int position) {
                 try {
-                    Province province = provinceData.get(provinceList.getSelectedItemPosition());
+                    Province province = provinceData.get(position);
                     currentProvince = province.id;
-                    cityList.setData(initCityData(province.id));
-                    countyList.setData(initCountryData(currentCity));
+                    basePicker.setPickerTwoData(initCityData(province.id));
+                    basePicker.setPickerThreeData(initCountryData(currentCity));
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
-        });
-        cityList.setOnSelectedChangedListener(new WheelView.OnSelectedChangedListener() {
+
             @Override
-            public void onSelectedChanged() {
+            public void onPickerTwoSelectedChanged(String data, int position) {
                 try {
-                    City city = cityData.get(cityList.getSelectedItemPosition());
+                    City city = cityData.get(position);
                     currentCity = city.id;
-                    countyList.setData(initCountryData(city.id));
+                    basePicker.setPickerThreeData(initCountryData(city.id));
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
-        });
-        countyList.setOnSelectedChangedListener(new WheelView.OnSelectedChangedListener() {
+
             @Override
-            public void onSelectedChanged() {
+            public void onPickerThreeSelectedChanged(String data, int position) {
                 try {
-                    County county = countyData.get(countyList.getSelectedItemPosition());
+                    County county = countyData.get(position);
                     currentCounty = county.id;
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -168,26 +95,13 @@ public class AddressPicker extends DialogFragment implements View.OnClickListene
     }
 
     private void initData() {
-        mAddressDictManager = new AddressDictManager(getActivity());
-        provinceList.setData(initProvinceData());
-        setCurrentProvince(params.currentProvince);
-        cityList.setData(initCityData(currentProvince));
-        setCurrentCity(params.currentCity);
-        countyList.setData(initCountryData(currentCity));
-        setCurrentCounty(params.currentCounty);
-    }
-
-    @Override
-    public void onClick(View v) {
-        int id = v.getId();
-        if (id == R.id.tv_cancel) {
-            dismiss();
-        } else if (id == R.id.tv_sure) {
-            if (params.mOnAddressSelectedListener != null) {
-                params.mOnAddressSelectedListener.onAddressSelected(provinceList.getSelectedItemData(), cityList.getSelectedItemData(), countyList.getSelectedItemData());
-            }
-            dismiss();
-        }
+        mAddressDictManager = new AddressDictManager(context);
+        basePicker.setPickerOneData(initProvinceData());
+        setCurrentProvince(params.getCurrentProvince());
+        basePicker.setPickerTwoData(initCityData(currentProvince));
+        setCurrentCity(params.getCurrentCity());
+        basePicker.setPickerThreeData(initCountryData(currentCity));
+        setCurrentCounty(params.getCurrentCounty());
     }
 
     private List<String> initProvinceData() {
@@ -236,7 +150,7 @@ public class AddressPicker extends DialogFragment implements View.OnClickListene
         Province provinceBean = mAddressDictManager.getProvinceBean(province);
         if (provinceBean != null) {
             currentProvince = provinceBean.id;
-            provinceList.setSelectedItem(province);
+            basePicker.setPickerOneSelectedItem(province);
         }
     }
 
@@ -244,7 +158,7 @@ public class AddressPicker extends DialogFragment implements View.OnClickListene
         City cityBean = mAddressDictManager.getCityBean(city);
         if (cityBean != null) {
             currentCity = cityBean.id;
-            cityList.setSelectedItem(city);
+            basePicker.setPickerTwoSelectedItem(city);
         }
     }
 
@@ -252,8 +166,13 @@ public class AddressPicker extends DialogFragment implements View.OnClickListene
         County countyBean = mAddressDictManager.getCountyBean(county);
         if (countyBean != null) {
             currentCounty = countyBean.id;
-            countyList.setSelectedItem(county);
+            basePicker.setPickerThreeSelectedItem(county);
         }
+    }
+
+    @Override
+    public void show(FragmentManager fragmentManager, String tag) {
+        basePicker.show(fragmentManager, tag);
     }
 
     public interface OnAddressSelectedListener {
@@ -265,90 +184,5 @@ public class AddressPicker extends DialogFragment implements View.OnClickListene
          * @param area     区
          */
         void onAddressSelected(String province, String city, String area);
-    }
-
-    /**
-     * 建造者
-     */
-    public static class Builder {
-        private Params p;
-
-        private Builder() {
-            p = new Params();
-        }
-
-        public Builder setShowMode(int mode) {
-            if (mode == CENTER_STYLE || mode == BOTTOM_STYLE) {
-                p.showMode = mode;
-            }
-            return this;
-        }
-
-        public Builder setOffsetX(int offsetX) {
-            p.mOffsetX = offsetX;
-            return this;
-        }
-
-        public Builder setTextSize(int size) {
-            p.textSize = size;
-            return this;
-        }
-
-        public Builder setTextColor(int color) {
-            p.textColor = color;
-            return this;
-        }
-
-        public Builder setLineColor(int color) {
-            p.lineColor = color;
-            return this;
-        }
-
-        public Builder setOnAddressSelectedListener(OnAddressSelectedListener onAddressSelectedListener) {
-            p.mOnAddressSelectedListener = onAddressSelectedListener;
-            return this;
-        }
-
-        public Builder setAddress(String province, String city, String county) {
-            p.currentProvince = province;
-            p.currentCity = city;
-            p.currentCounty = county;
-            return this;
-        }
-
-        public AddressPicker build() {
-            return AddressPicker.newInstance(p);
-        }
-    }
-
-    /**
-     * 可定义参数
-     */
-    private static class Params {
-        /**
-         * 显示位置
-         */
-        private int showMode = BOTTOM_STYLE;
-        /**
-         * 偏移(负左偏,正右偏)
-         */
-        private int mOffsetX = 0;
-        /**
-         * 文字相关
-         */
-        private int textSize = 16;
-        private int textColor = 0xFF333333;
-        /**
-         * 分割线颜色
-         */
-        private int lineColor = 0xFFffffff;
-        /**
-         * 日期选择监听
-         */
-        private OnAddressSelectedListener mOnAddressSelectedListener;
-        /**
-         * 初始位置
-         */
-        private String currentProvince, currentCity, currentCounty;
     }
 }

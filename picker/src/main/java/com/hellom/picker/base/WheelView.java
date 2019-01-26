@@ -1,4 +1,4 @@
-package com.hellom.picker.baseview;
+package com.hellom.picker.base;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -18,7 +18,7 @@ import com.hellom.picker.R;
 
 import java.util.List;
 
-import static com.hellom.picker.PickerConstant.*;
+import static com.hellom.picker.base.PickerConstant.*;
 
 /**
  * author:helloM
