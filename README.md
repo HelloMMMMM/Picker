@@ -1,3 +1,19 @@
+### 远程依赖
+**android studio 添加如下代码**
+```
+allprojects {
+		repositories {
+			...
+			maven { url 'https://www.jitpack.io' }
+		}
+	}
+```
+```
+dependencies {
+	        implementation 'com.github.HelloMMMMM:Picker:versionCode'
+	}
+```
+
 ### WheelView
 基础滚轮view为WheelView，可使用其自行创建选择器
 
