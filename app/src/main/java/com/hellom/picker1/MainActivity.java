@@ -57,16 +57,30 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         FragmentManager fragmentManager = getSupportFragmentManager();
         if (fragmentManager != null) {
             DatePicker datePicker = new DatePickerBuilder(new DatePickerParams())
+                    .setAlignMode(PickerConstant.CENTER_ALIGN_MODE)
+                    .setBtnStyle(PickerConstant.TOP_BTN_STYLE)
+                    .setCircle(false)
+                    .setLeftText("取消")
+                    .setRightText("确定")
+                    .setLeftTextColor(0xff000000)
+                    .setRightTextColor(0xff000000)
+                    .setLeftTextSize(16)
+                    .setRightTextSize(16)
+                    .setLineColor(0xffadadad)
+                    .setOffsetX(-16)
+                    .setShowMode(PickerConstant.BOTTOM_STYLE)
+                    .setShowSize(5)
+                    .setTitle("选择日期")
+                    .setTitleTextColor(0xff666666)
+                    .setTitleTextSize(20)
+                    .setVelocityRate(0.7f)
                     .setCurrentDate(1111, 11, 11)
                     .setOnDateSelectedListener(new DatePicker.OnDateSelectedListener() {
                         @Override
                         public void onDateSelected(String year, String month, String day) {
                             Toast.makeText(MainActivity.this, year + "-" + month + "-" + day, Toast.LENGTH_SHORT).show();
                         }
-                    })
-                    .setLineColor(Color.BLUE).setTextSize(18).setTextColor(Color.BLUE).setOffsetX(-16).setShowMode(PickerConstant.BOTTOM_STYLE)
-                    .setBtnStyle(PickerConstant.TOP_BTN_STYLE).setTitle("选择日期")
-                    .build();
+                    }).build();
             datePicker.show(fragmentManager, "datePicker");
         }
     }
@@ -75,15 +89,29 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         FragmentManager fragmentManager = getSupportFragmentManager();
         if (fragmentManager != null) {
             AddressPicker addressPicker = new AddressPickerBuilder(this, new AddressPickerParams())
-                    .setOffsetX(-16).setLineColor(Color.GREEN)
-                    .setTextColor(Color.GREEN).setShowMode(PickerConstant.BOTTOM_STYLE).setTextSize(18)
+                    .setAlignMode(PickerConstant.LEFT_ALIGN_MODE)
+                    .setBtnStyle(PickerConstant.BOTTOM_BTN_STYLE)
+                    .setCircle(true)
+                    .setLeftText("取消")
+                    .setRightText("确定")
+                    .setLeftTextColor(0xff000000)
+                    .setRightTextColor(0xff000000)
+                    .setLeftTextSize(16)
+                    .setRightTextSize(16)
+                    .setLineColor(0xffadadad)
+                    .setOffsetX(-16)
+                    .setShowMode(PickerConstant.BOTTOM_STYLE)
+                    .setShowSize(5)
+                    .setVelocityRate(0.7f)
+                    .setLeftBtnBackgroundColor(Color.GREEN)
+                    .setRightBtnBackgroundColor(Color.BLUE)
                     .setCurrentAddress("湖北", "襄阳市", "枣阳市")
                     .setOnAddressSelectedListener(new AddressPicker.OnAddressSelectedListener() {
                         @Override
                         public void onAddressSelected(String year, String month, String day) {
                             Toast.makeText(MainActivity.this, year + "-" + month + "-" + day, Toast.LENGTH_SHORT).show();
                         }
-                    }).setCircle(true).build();
+                    }).build();
             addressPicker.show(fragmentManager, "addressPicker");
         }
     }
